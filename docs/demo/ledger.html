@@ -378,7 +378,23 @@
   <button class="sw-pill" data-variant="phosphor">phosphor</button>
   <span class="sw-note" id="swNote"></span>
 </div>
+<style>
+  /* about banner (demo only) */
+  .bl-about{border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--surface);padding:14px 18px;margin:0 0 26px;font-family:var(--font-mono);font-size:13.5px;line-height:1.6;color:var(--ink-soft)}
+  .bl-about p{margin:0}
+  .bl-about .k{color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-size:11px;margin:0 0 6px}
+  .bl-about .by{margin-top:8px;color:var(--muted)}
+  .bl-links{margin-top:10px;display:flex;gap:6px 18px;flex-wrap:wrap;font-size:12.5px}
+  .bl-links a{color:var(--accent-soft);text-decoration:none;border-bottom:1px dotted var(--muted)}
+  .bl-links a:hover{color:var(--accent)}
+</style>
 <div class="page">
+<div class="bl-about">
+  <p class="k">// about this page</p>
+  <p>A dashboard I built that runs my last 100 rapid games from chess.com through the Stockfish engine to find where I actually lose: how often I blunder, which tactics I keep missing, and whether I'm getting better. Every number on the page is calculated live from the raw game data.</p>
+  <p class="by">Built by Alfred Gil · Python, Stockfish, JavaScript</p>
+  <div class="bl-links"><a href="https://github.com/alfredgil03/blunder-ledger">Code on GitHub →</a><a href="practice.html">Try the practice bot →</a><a href="review.html">See a full game review →</a></div>
+</div>
 
   <div class="masthead">
     <div>
