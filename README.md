@@ -1,6 +1,6 @@
 # Blunder Ledger
 
-A set of tool's linked to chess.com for a review of any single game, a progress report across a bunch of games, and a practice bot with puzzles built from your own mistakes.
+A set of tools linked to chess.com for a review of any single game, a progress report across a bunch of games, and a practice bot with puzzles built from your own mistakes.
 
 I built this so I could study my own games without paying for chess.com's premium analysis. Everything runs on Stockfish installed on your own computer plus the chess.com public API, so there's no daily limit and nothing to pay for.
 
