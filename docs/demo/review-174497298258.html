@@ -1,0 +1,1212 @@
+<title>Game Review</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@500;600;700&family=Ubuntu+Mono:wght@400;700&family=Inconsolata:wght@400;500;700&display=swap">
+<style>
+  /*
+    Single-game review — the sibling of the ledger's
+    ledger template. "midnight" (blue-black, gold accent) is the only screen
+    (2026-09-17 — the "phosphor" green-CRT alternate and its
+    switcher were removed entirely; this used to be a two-theme page with a
+    screen toggle, now it's just one fixed dark theme). Every color set
+    explicitly below.
+  */
+  :root {
+    color-scheme: dark;
+    --paper:#0a0d16; --surface:#10141f; --surface-2:#171c2a;
+    --ink:#dfe4f2; --ink-soft:#a9b3cc; --muted:#5e6880; --line:#1f2740;
+    --accent:#d9c27a; --accent-soft:#f0dc9a;
+    --series-mine:#c9b25a; --series-opp:#5ab0e8;
+    --status-good:#3fcf72; --status-good-text:#5fe08a; --status-critical:#ff5a66;
+    --status-warning:#e0c84a; --status-serious:#f0913a; --status-info:#4dd0e8;
+    --chart-surface:#10141f; --chart-grid:#1c2232; --chart-axis:#323a4f; --chart-muted:#5e6880;
+    --font-display:"Source Code Pro",ui-monospace,monospace; --font-body:"Inconsolata",ui-monospace,monospace;
+    --font-mono:"Inconsolata",ui-monospace,monospace;
+    --display-weight:600; --title-size:42px;
+    --glow:0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
+    --bloom:0 0 3px color-mix(in srgb, var(--ink) 25%, transparent);
+    --scan:0.18;
+    --chrome:#f2f6f2; --chrome-dim:#a8b3a8; --chrome-glow:0 0 10px color-mix(in srgb, var(--chrome) 35%, transparent);
+    --board-light:#3a3226; --board-dark:#1f1a14; --board-hl:#ffb84a;
+    --board-piece-white:#ffe9c2; --board-piece-white-stroke:#1a140c;
+    --board-piece-black:#150f08; --board-piece-black-stroke:#ffc766;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); }
+  body { color: var(--ink); font-family: var(--font-body); font-size: 14.5px; line-height: 1.6; text-shadow: var(--bloom); }
+  body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.55) 0 1px, transparent 1px 3px); opacity: var(--scan); }
+  /* Desktop-landscape width study (2026-09-18): the old flat
+     900px cap read as a phone-width column with huge empty gutters on any
+     real desktop window. This "middle ground" width sits deliberately
+     halfway between that 900px baseline and a 1680px full-desktop layout
+     the user rejected as too wide — computed as a live gutter average, not a
+     single guessed px value, so it stays centered between the two at any
+     window size instead of only matching at one specific width (a flat
+     1280px guess drifted off-center at other widths, which is what this
+     replaced). Below 900px wide (phone/narrow window) this collapses to the
+     same width the 900px baseline always had. */
+  .page {
+    --gutter-std: max(0px, (100vw - 900px) / 2);
+    --gutter-desk: max(0px, (100vw - 1680px) / 2);
+    --gutter-mid: calc((var(--gutter-std) + var(--gutter-desk)) / 2);
+    max-width: calc(100vw - 2 * var(--gutter-mid));
+    margin: 0 auto; padding: 36px 26px 90px; position: relative;
+  }
+  h1, h2 { font-family: var(--font-display); font-weight: var(--display-weight); margin: 0; text-wrap: balance; }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  .filter-pill { font-family: var(--font-mono); font-size: 12px; padding: 4px 2px; border: none; background: transparent; color: var(--chrome-dim); cursor: pointer; letter-spacing: 0.04em; }
+  .filter-pill::before { content: "[ "; color: var(--chrome-dim); }
+  .filter-pill::after { content: " ]"; color: var(--chrome-dim); }
+  .filter-pill:hover { color: var(--chrome); }
+  .filter-pill.active { color: var(--chrome); text-shadow: var(--chrome-glow); }
+  .filter-pill.active::before { content: "[\00d7 "; color: var(--chrome); }
+
+  .masthead { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; padding-bottom: 22px; border-bottom: 1px dashed var(--line); }
+  .eyebrow { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+  .eyebrow::before { content: "aetrone@chess.com:~/review$ "; color: var(--accent); }
+  .masthead h1 { font-size: var(--title-size); line-height: 1.02; text-transform: uppercase; letter-spacing: 0.02em; color: var(--chrome); text-shadow: var(--chrome-glow); }
+  .masthead .sub { color: var(--ink-soft); font-size: 15px; margin-top: 8px; max-width: 52ch; }
+  .masthead .sub::before { content: "# "; color: var(--muted); }
+  .masthead .sub a { color: var(--ink); text-decoration: none; border-bottom: 1px dotted var(--muted); }
+  .record { text-align: right; flex-shrink: 0; }
+  .record .figures { font-family: var(--font-display); font-weight: var(--display-weight); font-size: 46px; white-space: nowrap; text-shadow: var(--glow); line-height: 1; }
+  .record .figures .w { color: var(--status-good-text); } .record .figures .l { color: var(--status-critical); } .record .figures .d { color: var(--muted); }
+  .record .caption { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .record .caption::before { content: "// "; }
+
+  section { margin-top: 52px; }
+  /* Per-section collapse-on-click (chevron, data-collapsed) was removed
+     2026-09-18 — every section's visibility is now driven by the
+     widget-filters row under the tiles instead (see .widget-filters below),
+     so a section header is just a label, never independently interactive. */
+  .section-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+  .section-head h2 { font-size: 17px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--chrome); }
+  .section-head .rule { flex: 1; border-top: 1px dashed var(--line); }
+  .section-note { color: var(--ink-soft); font-size: 14.5px; margin: 0 0 18px; max-width: 64ch; }
+  .section-note::before { content: "# "; color: var(--muted); }
+
+  /* widget filter row (added 2026-09-18) — one toggle per
+     section, independently switched (not mutually exclusive, unlike the
+     ledger's Last50/Previous50/Both switcher). Sized up 2026-09-18 (per
+     the user, "bigger and more visible") into real bordered buttons with a
+     checkbox glyph rather than the small bracket-text .filter-pill style
+     used for the board's prev/next — those stay subtle on purpose, this is
+     primary page navigation and reads as such. Board + win-probability
+     default on; missed moves + best/worst default off, matching each
+     section's own starting `hidden` attribute in the markup below. */
+  .widget-filters { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+  .widget-toggle {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 14.5px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 13px 20px; border-radius: 5px; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); cursor: pointer;
+    transition: border-color .15s ease, color .15s ease, background-color .15s ease, box-shadow .15s ease;
+  }
+  .widget-toggle .box { width: 13px; height: 13px; border: 1.5px solid var(--muted); border-radius: 2px; flex-shrink: 0; transition: inherit; }
+  .widget-toggle:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .widget-toggle:hover .box { border-color: var(--ink-soft); }
+  .widget-toggle.active { border-color: var(--accent); color: var(--accent-soft);
+    background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .widget-toggle.active .box { border-color: var(--accent); background: var(--accent); }
+  .widget-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 640px) { .widget-toggle { padding: 11px 16px; font-size: 13px; } }
+
+  /* tiles */
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 28px; }
+  .tile { padding: 20px 18px 18px 0; border-right: 1px solid var(--line); }
+  .tile:last-child { border-right: none; } .tile + .tile { padding-left: 18px; }
+  .tile .label { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 8px; line-height: 1.4; }
+  .tile .label::before { content: "[\00a0"; color: var(--muted); } .tile .label::after { content: "\00a0]"; color: var(--muted); }
+  .tile .value { font-family: var(--font-display); font-weight: var(--display-weight); font-size: 34px; line-height: 1.05; color: var(--ink); margin: 0; text-shadow: var(--glow); font-variant-numeric: tabular-nums; }
+  .tile .sub { font-size: 12.5px; color: var(--ink-soft); margin: 6px 0 0; }
+  .tile .delta { font-weight: 700; }
+  .tile .delta.better { color: var(--status-good-text); }
+  .tile .delta.worse { color: var(--status-critical); }
+  .tile .delta.even { color: var(--muted); }
+  .tile .sub.no-data { font-style: italic; }
+  @media (max-width: 640px) { .tiles { grid-template-columns: repeat(2, 1fr); } .tile:nth-child(2n) { border-right: none; } .tile:nth-child(n+3) { border-top: 1px solid var(--line); } }
+
+  /* chart */
+  .chart-card { border-top: 1px solid var(--line); padding: 20px 0 14px; }
+  .legend { display: flex; gap: 20px; margin-bottom: 6px; font-size: 13px; color: var(--ink-soft); flex-wrap: wrap; }
+  .legend .item { display: flex; align-items: center; gap: 7px; }
+  .legend .swatch { width: 12px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+  .legend .ring { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
+  .chart-wrap { position: relative; }
+  svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+  .mini-chart-title { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin: 18px 0 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tooltip { position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--accent); font-family: var(--font-mono); font-size: 12px; line-height: 1.5; padding: 9px 12px; white-space: nowrap; opacity: 0; transform: translate(-50%, -110%); transition: opacity .08s; z-index: 5; text-shadow: none; box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 30%, transparent); }
+  .tooltip.show { opacity: 1; }
+  .tooltip .tt-head { color: var(--accent); font-weight: 700; margin-bottom: 3px; }
+  .tooltip .tt-row { display: flex; justify-content: space-between; gap: 14px; }
+  .tooltip .tt-row span:last-child { color: var(--accent-soft); }
+  .tooltip .tt-hint { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); font-size: 11px; color: var(--accent); }
+
+  /* move cards */
+  .moves { border-top: 1px solid var(--line); }
+  .move { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 60px; }
+  @keyframes moveHighlight { from { background: color-mix(in srgb, var(--accent) 20%, transparent); } to { background: transparent; } }
+  .move.move-highlight { animation: moveHighlight 1.6s ease-out; }
+  @media (prefers-reduced-motion: reduce) { .move.move-highlight { animation: none; outline: 2px solid var(--accent); outline-offset: 2px; } }
+  .mv-meta { font-family: var(--font-mono); font-size: 12px; color: var(--muted); line-height: 1.8; }
+  .mv-meta .rank { font-family: var(--font-display); font-weight: var(--display-weight); font-size: 26px; color: var(--chrome); line-height: 1; display: block; margin-bottom: 4px; }
+  .mv-meta .rank::before { content: "["; color: var(--chrome-dim); } .mv-meta .rank::after { content: "]"; color: var(--chrome-dim); }
+  .mv-line { font-family: var(--font-mono); font-size: 16px; margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+  .mv-line .san { font-weight: 700; color: var(--ink); }
+  .mv-line .san.bad { color: var(--status-critical); } .mv-line .san.good { color: var(--status-good-text); }
+  .mv-line .arrow { color: var(--muted); font-size: 12px; }
+  .mv-line .best { color: var(--status-good-text); font-weight: 700; }
+  .mv-stat { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-soft); margin-bottom: 6px; }
+  .mv-stat b { color: var(--ink); font-weight: 700; }
+  .view-board-link { color: var(--chrome-dim); cursor: pointer; text-decoration: underline dotted; }
+  .view-board-link:hover { color: var(--chrome); }
+  .mv-why { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+  .mv-why::before { content: "# "; color: var(--muted); }
+  .tag { display: inline-block; padding: 0 7px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid; }
+  .tag.blunder { color: var(--status-critical); border-color: var(--status-critical); }
+  .tag.miss { color: var(--status-critical); border-color: var(--status-critical); }
+  .tag.mistake { color: var(--status-serious); border-color: var(--status-serious); }
+  .tag.inaccuracy { color: var(--status-warning); border-color: var(--status-warning); }
+  .tag.brilliant, .tag.great-find { color: var(--status-info); border-color: var(--status-info); }
+  .tag.excellent, .tag.good, .tag.best { color: var(--status-good-text); border-color: var(--status-good-text); }
+  .tag.book, .tag.opp { color: var(--muted); border-color: var(--muted); }
+  .tag.motif { color: var(--status-info); border-color: var(--status-info); margin-left: 8px; }
+  @media (max-width: 600px) { .move { grid-template-columns: 1fr; } }
+  .empty { font-family: var(--font-mono); color: var(--muted); padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .empty::before { content: "# "; }
+  /* ---- board + review panel (chess.com-style two-column layout) ---- */
+  /* align-items: stretch (not the grid default's "start") plus overflow:auto +
+     min-height:0 on the scrollable panel column below is what makes the
+     sidebar's bottom edge track the board's actual rendered height instead
+     of a fixed pixel cap (2026-09-16) — overflow:auto content
+     doesn't count toward the row's own intrinsic height, so the board
+     column (a fixed-ratio SVG) is what determines the row height, and the
+     panel column just gets stretched to match it and scrolls internally. */
+  .review-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: 26px; align-items: stretch; }
+  @media (max-width: 720px) { .review-layout { grid-template-columns: 1fr; } .review-panel-col { min-height: 320px; } }
+  .board-card { background: var(--chart-surface); border: 1px solid var(--line); padding: 20px; }
+  .board-holder { max-width: 500px; margin: 0 auto; }
+  .board-svg { width: 100%; height: auto; display: block; }
+  .replay-controls { display: flex; align-items: center; justify-content: center; gap: 12px; max-width: 500px; margin: 16px auto 0; }
+  /* Player name plates above/below the board (opponent's on top since their
+     pieces render there, the user's own on the bottom) — redesigned 2026-09-17,
+    , chess.com-style: name+rating on one line, captured-piece
+     icons (tightly overlapped) plus the material lead on the line below,
+     clock as its own badge on the right, full height of the bar. */
+  .board-player-bar { max-width: 500px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface-2); border: 1px solid var(--line); padding: 6px 10px; }
+  #boardBarOpp { margin-bottom: 6px; }
+  #boardBarMe { margin-top: 6px; }
+  .bpb-info { min-width: 0; flex: 1; }
+  .bpb-name-row { display: flex; align-items: baseline; gap: 7px; font-family: var(--font-mono); }
+  .bpb-name { font-weight: 700; color: var(--ink); font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bpb-elo { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+  .board-clock { font-family: var(--font-mono); font-size: 13px; font-weight: 700; padding: 5px 12px; min-width: 46px; text-align: center; background: var(--surface); border: 1px solid var(--line); color: var(--ink); flex-shrink: 0; }
+  .board-clock.low { color: var(--status-critical); border-color: var(--status-critical); }
+  /* Overlapped like chess.com's own captured-piece tray: each icon sized up
+     from the first cut (2026-09-17) and pulled back further so
+     they stack rather than merely touch. */
+  .board-material { display: inline-flex; align-items: center; min-height: 26px; margin-top: 3px; }
+  .board-material .cap-icon { margin-right: -10px; }
+  .board-material .mat-plus { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--status-good-text); margin-left: 9px; }
+
+  /* The "speech bubble": the old per-move card content, now showing whichever
+     move the board is currently on, one at a time (2026-09-16, replacing the
+     "Every move, in order" list — same information, no longer a
+     scrolling wall of cards). */
+  /* overflow:hidden here (not just on .move-list-compact inside it) is what
+     actually makes the "automatic minimum size" rule apply to this column as
+     a grid item — without it on the item itself, the row still grows to fit
+     every move regardless of the nested scroll box. This is the fix that
+     was missing 2026-09-16: the sidebar was still growing with
+     the move count instead of stopping at the board's height. */
+  .review-panel-col { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .speech-bubble { background: var(--chart-surface); border: 1px solid var(--line); border-left: 3px solid var(--accent); padding: 14px 16px; margin-bottom: 14px; min-height: 84px; flex-shrink: 0; }
+  .speech-bubble .sb-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .speech-bubble .sb-move { font-family: var(--font-mono); font-size: 14.5px; margin-bottom: 6px; }
+  .speech-bubble .sb-stat { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; }
+  .speech-bubble .sb-why { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+  .speech-bubble .sb-empty { color: var(--muted); font-family: var(--font-mono); font-size: 13px; }
+
+  /* Compact two-column (White | Black) move list, click a cell to jump the
+     board there — replaces the retired card list as the "every move" index. */
+  .move-list-compact { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid var(--line); font-family: var(--font-mono); font-size: 13px; }
+  .mlc-row { display: grid; grid-template-columns: 32px 1fr 1fr; border-bottom: 1px solid var(--line); }
+  .mlc-row:last-child { border-bottom: none; }
+  .mlc-num { padding: 6px 4px; color: var(--muted); text-align: right; }
+  .mlc-cell { padding: 6px 8px; cursor: pointer; color: var(--ink-soft); border-left: 1px solid var(--line); }
+  .mlc-cell:hover { background: var(--surface); color: var(--chrome); }
+  .mlc-cell.active { background: var(--surface-2); color: var(--chrome); font-weight: 700; }
+  .mlc-cell.empty { cursor: default; }
+  .mlc-cell.empty:hover { background: transparent; color: var(--ink-soft); }
+  .mlc-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; flex-shrink: 0; }
+  .mlc-cap-icon { display: inline-block; vertical-align: -4px; margin-left: 3px; }
+
+  footer { margin-top: 54px; padding-top: 18px; border-top: 1px dashed var(--line); color: var(--muted); font-size: 12.5px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: var(--font-mono); text-transform: lowercase; }
+  footer span:first-child::before { content: "-- "; } footer span:last-child::after { content: " -- end of review --"; }
+  /* Practice-sparring CTA (added 2026-09-18; enlarged into a
+     proper card the same day — "pretty small... make it a little more
+     apparent as to what that feature is for" — a bare text link didn't say
+     what chess-practice's Blunder Bait actually does, so this adds a one-line
+     description alongside the link, not just a bigger label. */
+  .practice-cta { display: flex; align-items: center; gap: 14px; margin: 16px 0 0; padding: 14px 18px;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+    text-decoration: none; max-width: 480px; transition: border-color .15s ease, box-shadow .15s ease; }
+  .practice-cta:hover { border-color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+  .practice-cta-icon { font-size: 28px; flex-shrink: 0; line-height: 1; }
+  .practice-cta-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .practice-cta-title { font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--accent-soft); text-transform: uppercase; letter-spacing: 0.02em; }
+  .practice-cta-sub { font-family: var(--font-body); font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
+  .practice-cta-arrow { margin-left: auto; font-size: 20px; color: var(--accent); flex-shrink: 0; }
+  /* opening name (added 2026-09-24) */
+  .masthead .opening { color: var(--accent-soft); font-size: 13.5px; margin: 6px 0 0; max-width: 60ch; }
+  .masthead .opening::before { content: "// "; color: var(--muted); }
+  .masthead .opening .book { color: var(--muted); }
+  /* "what lost this game" headline (added 2026-09-24): one mechanical
+     sentence computed from the win-probability curve, never hand-written. */
+  .headline { margin: 22px 0 0; padding: 12px 16px; border: 1px solid var(--line); border-left: 3px solid var(--status-critical); background: var(--surface); font-size: 15px; line-height: 1.5; }
+  .headline.win { border-left-color: var(--status-good-text); } .headline.draw { border-left-color: var(--muted); }
+  .headline .kicker { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); display: block; margin-bottom: 3px; }
+  .headline b { color: var(--chrome); }
+  /* vs. this opponent (added 2026-09-24): hidden unless prior games exist */
+  .h2h { margin: 14px 0 0; padding: 14px 16px; border: 1px solid var(--line); background: var(--surface); }
+  .h2h-top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .h2h-title { font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--accent-soft); text-transform: uppercase; letter-spacing: 0.02em; }
+  .h2h-record { font-family: var(--font-display); font-weight: 600; font-size: 22px; white-space: nowrap; }
+  .h2h-record .w { color: var(--status-good-text); } .h2h-record .l { color: var(--status-critical); } .h2h-record .d { color: var(--muted); }
+  .h2h-chips { display: flex; gap: 4px; flex-wrap: wrap; margin: 10px 0 0; }
+  .h2h-chip { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border-radius: 3px; color: var(--paper); text-shadow: none; }
+  .h2h-chip.w { background: var(--status-good-text); } .h2h-chip.l { background: var(--status-critical); } .h2h-chip.d { background: var(--muted); }
+  .h2h-chip.now { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .h2h ul { margin: 10px 0 0; padding: 0; list-style: none; font-size: 13.5px; color: var(--ink-soft); }
+  .h2h li::before { content: "> "; color: var(--accent); }
+  .h2h .fine { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin: 8px 0 0; }
+  /* move-quality mix (added 2026-09-24): same tag groups and colors as the chart legend */
+  .under-board { margin-top: 28px; }
+  .mix { margin-top: 22px; }
+  .mix-row { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .mix-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mix-bar { display: flex; height: 22px; border-radius: 3px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); }
+  .mix-seg { display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--paper); text-shadow: none; min-width: 0; overflow: hidden; }
+  .mix-seg + .mix-seg { border-left: 1px solid var(--paper); }
+  .mix-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-soft); margin: 6px 0 0 108px; }
+  .mix-legend .item { display: flex; align-items: center; gap: 6px; }
+  .mix-legend .swatch { width: 10px; height: 10px; border-radius: 2px; }
+  @media (max-width: 640px) { .mix-row { grid-template-columns: 64px 1fr; } .mix-legend { margin-left: 0; } }
+  [hidden] { display: none !important; }
+</style>
+
+<div class="page">
+
+  <div class="masthead">
+    <div>
+      <p class="eyebrow" id="eyebrow">cat game-review.txt</p>
+      <h1>Game Review</h1>
+      <p class="sub" id="mastheadSub"></p>
+      <p class="opening" id="openingLine" hidden></p>
+      <!-- Practice link: the --practice-url flag fills the href and removes this link when omitted. -->
+      <a class="practice-cta" href="practice.html" target="_blank" rel="noopener">
+        <span class="practice-cta-icon">&#127907;</span>
+        <span class="practice-cta-text">
+          <span class="practice-cta-title">Blunder Bait &mdash; practice sparring</span>
+          <span class="practice-cta-sub">Play a live bot tuned to bait the exact patterns behind your own blunders.</span>
+        </span>
+        <span class="practice-cta-arrow">&rarr;</span>
+      </a>
+    </div>
+    <div class="record">
+      <div class="figures tabular" id="recordFigures"></div>
+      <p class="caption" id="recordCaption"></p>
+    </div>
+  </div>
+
+  <div class="h2h" id="h2h" hidden></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="widget-filters" id="widgetFilters">
+    <button class="widget-toggle active" type="button" data-widget="board" aria-pressed="true"><span class="box"></span>Board</button>
+    <button class="widget-toggle active" type="button" data-widget="winprob" aria-pressed="true"><span class="box"></span>Win probability</button>
+    <button class="widget-toggle" type="button" data-widget="missed" aria-pressed="false"><span class="box"></span>Missed moves</button>
+    <button class="widget-toggle" type="button" data-widget="bestworst" aria-pressed="false"><span class="box"></span>Best &amp; worst moves</button>
+  </div>
+
+  <section data-widget="board">
+    <div class="section-head"><h2>Board</h2><div class="rule"></div></div>
+    <p class="section-note">Step through the game move by move (&larr; &rarr; keys work too), or click any move in the list. Solid arrow is the move played; dashed green is the engine's alternative, when one exists.</p>
+    <div class="review-layout">
+      <div class="review-board-col">
+        <div class="board-card">
+          <div class="board-player-bar" id="boardBarOpp">
+            <div class="bpb-info">
+              <div class="bpb-name-row"><span class="bpb-name" id="bpbNameOpp"></span><span class="bpb-elo" id="bpbEloOpp"></span></div>
+              <span class="board-material" id="boardMaterialOpp"></span>
+            </div>
+            <span class="board-clock" id="boardClockOpp"></span>
+          </div>
+          <div class="board-holder" id="boardHolder"></div>
+          <div class="board-player-bar" id="boardBarMe">
+            <div class="bpb-info">
+              <div class="bpb-name-row"><span class="bpb-name" id="bpbNameMe"></span><span class="bpb-elo" id="bpbEloMe"></span></div>
+              <span class="board-material" id="boardMaterialMe"></span>
+            </div>
+            <span class="board-clock" id="boardClockMe"></span>
+          </div>
+          <div class="replay-controls">
+            <button class="filter-pill" id="replayPrev" type="button">&larr; prev</button>
+            <button class="filter-pill" id="replayNext" type="button">next &rarr;</button>
+            <button class="filter-pill" id="copyFen" type="button" title="Copy this position's FEN to paste into any analysis board">copy FEN</button>
+          </div>
+        </div>
+      </div>
+      <div class="review-panel-col">
+        <div class="speech-bubble" id="speechBubble"></div>
+        <div class="move-list-compact" id="moveListCompact"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Not a widget: sits under the board when the Board widget is on, and
+       stays visible (just below the filter row) when it is toggled off. -->
+  <div class="under-board">
+    <div class="headline" id="headline" hidden></div>
+    <div class="mix" id="mix"></div>
+  </div>
+
+
+  <section data-widget="winprob">
+    <div class="section-head"><h2>Win probability, move by move</h2><div class="rule"></div></div>
+    <p class="section-note">Your win probability after every half-move. Click any point to view it on the board above.</p>
+    <div class="chart-card">
+      <div class="legend" id="wpLegend"></div>
+      <div class="chart-wrap" id="wpChartWrap"></div>
+      <p class="mini-chart-title" id="clockChartTitle" hidden>Time remaining &mdash; shaded band marks low time</p>
+      <div class="chart-wrap" id="clockChartWrap"></div>
+    </div>
+  </section>
+
+  <section data-widget="missed" hidden>
+    <div class="section-head"><h2>Missed moves</h2><div class="rule"></div></div>
+    <p class="section-note">Tactical motifs (forks, pins, discovered attacks/checks) spotted mechanically from the board, not the engine's evaluation. Pin and discovered check are exact; fork and discovered attack are heuristics, same approximation level as the sacrifice/free-capture checks used elsewhere on this page — not a guarantee the threat was truly inescapable.</p>
+    <p class="section-note" style="margin-top:-8px;font-weight:600;">You missed</p>
+    <div class="moves" id="missedMovesYou"></div>
+    <p class="section-note" style="margin-top:18px;font-weight:600;">Your opponent found</p>
+    <div class="moves" id="missedMovesOpp"></div>
+  </section>
+
+  <section data-widget="bestworst" hidden>
+    <div class="section-head"><h2>Best &amp; worst moves</h2><div class="rule"></div></div>
+    <p class="section-note" style="margin-top:-8px;font-weight:600;">Worst — by win probability thrown away</p>
+    <p class="section-note">Not raw centipawns — a huge engine swing in an already-lost position barely matters; a smaller one that gives up a close game does.</p>
+    <div class="moves" id="worstMoves"></div>
+    <p class="section-note" style="margin-top:18px;font-weight:600;">Best — by how much was riding on finding them</p>
+    <p class="section-note">Brilliant, Great Find, Excellent, or Best moves only, ranked by the gap between the engine's best line and its second-best — your own good moves can't "gain" win probability, since the eval already assumes you find them.</p>
+    <div class="moves" id="bestMoves"></div>
+  </section>
+
+  <footer>
+    <span>stockfish depth 16, multipv 2 · chess.com public api</span>
+    <span id="generated">generated</span>
+  </footer>
+</div>
+
+<script>
+/*
+  REVIEW is review.py's --out JSON, embedded verbatim, plus one optional map,
+  NOTES (ply -> short explanation) written by hand per review after verifying
+  the position programmatically.
+  Everything else on the page is computed from REVIEW here; don't hand-edit
+  the numbers.
+*/
+const REVIEW = {"headers": {"White": "aetrone", "Black": "TheAdetunji", "WhiteElo": "306", "BlackElo": "322", "Result": "0-1", "Termination": "TheAdetunji won by resignation", "Date": "2026.09.15", "TimeControl": "600", "ECO": "C47", "ECOUrl": "https://www.chess.com/openings/Four-Knights-Game-Italian-Variation", "Link": "https://www.chess.com/game/live/174497298258"}, "my_color": "white", "opening": {"eco": "C47", "name": "Four Knights Game", "plies": 6}, "accuracy": {"white": 59.4, "black": 65.3}, "fens": ["rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1", "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2", "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2", "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3", "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3", "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4", "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R b KQkq - 5 4", "r1b1kb1r/ppppqppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 5", "r1b1kb1r/ppppqppp/2n2n2/4p3/2BPP3/2N2N2/PPP2PPP/R1BQK2R b KQkq - 0 5", "r1b1kb1r/ppppqppp/2n2n2/8/2BpP3/2N2N2/PPP2PPP/R1BQK2R w KQkq - 0 6", "r1b1kb1r/ppppqppp/2n2n2/8/2BNP3/2N5/PPP2PPP/R1BQK2R b KQkq - 0 6", "r1b1kb1r/pppp1ppp/2nq1n2/8/2BNP3/2N5/PPP2PPP/R1BQK2R w KQkq - 1 7", "r1b1kb1r/pppp1ppp/2nq1n2/3N4/2BNP3/8/PPP2PPP/R1BQK2R b KQkq - 2 7", "1rb1kb1r/pppp1ppp/2nq1n2/3N4/2BNP3/8/PPP2PPP/R1BQK2R w KQk - 3 8", "1rb1kb1r/pppp1ppp/2nq1N2/8/2BNP3/8/PPP2PPP/R1BQK2R b KQk - 0 8", "1rb1kb1r/pppp1p1p/2nq1p2/8/2BNP3/8/PPP2PPP/R1BQK2R w KQk - 0 9", "1rb1kb1r/pppp1p1p/2nq1p2/8/2BNP3/3Q4/PPP2PPP/R1B1K2R b KQk - 1 9", "1rb1kb1r/pppp1p1p/3q1p2/8/2BnP3/3Q4/PPP2PPP/R1B1K2R w KQk - 0 10", "1rb1kb1r/pppp1p1p/3q1p2/8/2BnP3/3QB3/PPP2PPP/R3K2R b KQk - 1 10", "1rb1kb1r/pp1p1p1p/3q1p2/2p5/2BnP3/3QB3/PPP2PPP/R3K2R w KQk - 0 11", "1rb1kb1r/pp1p1p1p/3q1p2/2p5/2BnP3/2PQB3/PP3PPP/R3K2R b KQk - 0 11", "1rb1kb1r/pp1p1p1p/5p2/2p1q3/2BnP3/2PQB3/PP3PPP/R3K2R w KQk - 1 12", "1rb1kb1r/pp1p1p1p/5p2/2p1q3/2BPP3/3QB3/PP3PPP/R3K2R b KQk - 0 12", "1rb1kb1r/pp1p1p1p/5p2/4q3/2BpP3/3QB3/PP3PPP/R3K2R w KQk - 0 13", "1rb1kb1r/pp1p1p1p/5p2/4q3/2BBP3/3Q4/PP3PPP/R3K2R b KQk - 0 13", "1rb1kb1r/pp1p1p1p/5p2/8/2BBPq2/3Q4/PP3PPP/R3K2R w KQk - 1 14", "1rb1kb1r/Bp1p1p1p/5p2/8/2B1Pq2/3Q4/PP3PPP/R3K2R b KQk - 0 14", "1rb1k2r/Bp1p1p1p/5p2/8/1bB1Pq2/3Q4/PP3PPP/R3K2R w KQk - 1 15", "1rb1k2r/Bp1p1p1p/5p2/8/1bB1Pq2/3Q4/PP3PPP/R4K1R b k - 2 15", "r1b1k2r/Bp1p1p1p/5p2/8/1bB1Pq2/3Q4/PP3PPP/R4K1R w k - 3 16", "r1b1k2r/1p1p1p1p/5p2/8/1bB1Pq2/3QB3/PP3PPP/R4K1R b k - 4 16", "r1b1k2r/1p1p1p1p/5p2/4q3/1bB1P3/3QB3/PP3PPP/R4K1R w k - 5 17", "r1b1k2r/1p1p1p1p/5p2/4q3/1bB1P3/3QB3/PP3PPP/3R1K1R b k - 6 17", "r1b1k2r/1p1p1p1p/5p2/8/1bB1P3/3QB3/Pq3PPP/3R1K1R w k - 0 18", "r1b1k2r/1p1p1p1p/5p2/8/1bB1P3/3QB3/Pq3PPP/1R3K1R b k - 1 18", "r1b1k2r/1p1p1p1p/5p2/8/1bB1P3/2qQB3/P4PPP/1R3K1R w k - 2 19", "r1b1k2r/1p1p1p1p/5p2/8/1bB1P3/2qQB3/P3KPPP/1R5R b k - 3 19", "2b1k2r/1p1p1p1p/5p2/8/1bB1P3/2qQB3/r3KPPP/1R5R w k - 0 20", "2b1k2r/1p1p1p1p/5p2/8/1bB1P3/2qQBK2/r4PPP/1R5R b k - 1 20", "2b1k2r/1p1p1p1p/5p2/8/1bB1P3/r1qQBK2/5PPP/1R5R w k - 2 21", "2b1k2r/1p1p1p1p/5p2/8/1bB1P3/r1qQBK2/5PPP/1RR5 b k - 3 21", "2b1k2r/1p1p1p1p/5p2/4q3/1bB1P3/r2QBK2/5PPP/1RR5 w k - 4 22", "2b1k2r/1p1p1p1p/5p2/4q3/1RB1P3/r2QBK2/5PPP/2R5 b k - 0 22", "2b1k2r/1p1p1p1p/5p2/4q3/1RB1P3/3rBK2/5PPP/2R5 w k - 0 23", "2b1k2r/1p1p1p1p/5p2/4q3/1R2P3/3BBK2/5PPP/2R5 b k - 0 23", "2b1k2r/1p1p1p1p/5p2/7q/1R2P3/3BBK2/5PPP/2R5 w k - 1 24", "2b1k2r/1p1p1p1p/5p2/7q/1R2P3/3BB1K1/5PPP/2R5 b k - 2 24", "2b1k1r1/1p1p1p1p/5p2/7q/1R2P3/3BB1K1/5PPP/2R5 w - - 3 25", "2b1k1r1/1p1p1p1p/5p2/7q/1R2PK2/3BB3/5PPP/2R5 b - - 4 25", "2b1k3/1p1p1p1p/5p2/6rq/1R2PK2/3BB3/5PPP/2R5 w - - 5 26", "2b1k3/1p1p1p1p/5p2/6rq/1R2PKP1/3BB3/5P1P/2R5 b - - 0 26", "2b1k3/1p1p1p1p/5p2/7q/1R2PKr1/3BB3/5P1P/2R5 w - - 0 27", "2b1k3/1p1p1p1p/5p2/7q/1R2P1r1/3BBK2/5P1P/2R5 b - - 1 27", "2b1k3/1p1p1p1p/5p2/8/1R2P1r1/3BBK1q/5P1P/2R5 w - - 2 28", "2b1k3/1p1p1p1p/5p2/8/1R2P1r1/3BB2q/4KP1P/2R5 b - - 3 28", "2b1k3/1p1p1p1p/5p2/8/1R2P1r1/3BB3/4KP1q/2R5 w - - 0 29", "2b1k3/1p1p1p1p/5p2/8/1R2P1r1/3B4/3BKP1q/2R5 b - - 1 29", "2b1k3/1p1p1p1p/5p2/8/1R2P3/3B4/3BKPrq/2R5 w - - 2 30", "2b1k3/1p1p1p1p/5p2/8/1R2P3/3BB3/4KPrq/2R5 b - - 3 30", "2b1k3/1p1p1p2/5p2/7p/1R2P3/3BB3/4KPrq/2R5 w - - 0 31", "2b1k3/1p1p1p2/5p2/7p/1R2P3/3BB3/4KPrq/3R4 b - - 1 31", "2b1k3/1p1p1p2/5p2/8/1R2P2p/3BB3/4KPrq/3R4 w - - 0 32", "2b1k3/1p1p1p2/5p2/4P3/1R5p/3BB3/4KPrq/3R4 b - - 0 32", "2b1k3/1p1p1p2/8/4p3/1R5p/3BB3/4KPrq/3R4 w - - 0 33", "2b1k3/1p1p1p2/8/4p3/1R2B2p/4B3/4KPrq/3R4 b - - 1 33", "2b1k3/1p3p2/3p4/4p3/1R2B2p/4B3/4KPrq/3R4 w - - 0 34", "2b1k3/1p3p2/3p4/4p3/1R5p/4B3/4KPBq/3R4 b - - 0 34", "4k3/1p3p2/3p4/4p3/1R4bp/4B3/4KPBq/3R4 w - - 1 35", "4k3/1p3p2/3p4/4p3/1R4bp/4B3/5PBq/3R1K2 b - - 2 35", "4k3/1p3p2/3p4/4p3/1R5p/4B3/5PBq/3b1K2 w - - 0 36", "4k3/1p3p2/3p4/4p3/7p/4B3/5PBq/1R1b1K2 b - - 1 36", "4k3/1p3p2/3p4/4p3/6bp/4B3/5PBq/1R3K2 w - - 2 37", "4k3/1R3p2/3p4/4p3/6bp/4B3/5PBq/5K2 b - - 0 37", "4k3/1R3p2/3p4/4p3/7p/4B3/4bPBq/5K2 w - - 1 38", "4k3/1R3p2/3p4/4p3/7p/4B3/4KPBq/8 b - - 0 38", "4k3/1R3p2/3p4/4p3/7p/4B3/4KPq1/8 w - - 0 39", "1R2k3/5p2/3p4/4p3/7p/4B3/4KPq1/8 b - - 1 39", "1R6/4kp2/3p4/4p3/7p/4B3/4KPq1/8 w - - 2 40", "8/1R2kp2/3p4/4p3/7p/4B3/4KPq1/8 b - - 3 40", "8/1R3p2/3pk3/4p3/7p/4B3/4KPq1/8 w - - 4 41", "8/5p2/3pk3/4p3/7p/4B3/4KPq1/1R6 b - - 5 41", "8/5p2/3pk3/4p3/8/4B2p/4KPq1/1R6 w - - 0 42"], "annotations": [{"ply": 0, "fullmove": 1, "color": "white", "san": "e4", "tag": "Book", "phase": "opening", "cpl": 0, "best_san": null, "best_uci": null, "uci": "e2e4", "eval_after_white": 32, "clock": 599.2, "move_accuracy": 100.0, "is_me": true, "wp_before": 52.8, "wp_after": 52.9, "gap_to_second_best": 9}, {"ply": 1, "fullmove": 1, "color": "black", "san": "e5", "tag": "Book", "phase": "opening", "cpl": 0, "best_san": null, "best_uci": null, "uci": "e7e5", "eval_after_white": 29, "clock": 598.3, "move_accuracy": 100.0, "is_me": false, "wp_before": 47.1, "wp_after": 47.3, "gap_to_second_best": 4}, {"ply": 2, "fullmove": 2, "color": "white", "san": "Nf3", "tag": "Book", "phase": "opening", "cpl": 0, "best_san": null, "best_uci": null, "uci": "g1f3", "eval_after_white": 30, "clock": 597.4, "move_accuracy": 100.0, "is_me": true, "wp_before": 52.7, "wp_after": 52.8, "gap_to_second_best": 21}, {"ply": 3, "fullmove": 2, "color": "black", "san": "Nc6", "tag": "Book", "phase": "opening", "cpl": 0, "best_san": null, "best_uci": null, "uci": "b8c6", "eval_after_white": 24, "clock": 590.8, "move_accuracy": 100.0, "is_me": false, "wp_before": 47.2, "wp_after": 47.8, "gap_to_second_best": 15}, {"ply": 4, "fullmove": 3, "color": "white", "san": "Nc3", "tag": "Book", "phase": "opening", "cpl": 14, "best_san": null, "best_uci": null, "uci": "b1c3", "eval_after_white": 10, "clock": 593.2, "move_accuracy": 94.4, "is_me": true, "wp_before": 52.2, "wp_after": 50.9, "gap_to_second_best": 9}, {"ply": 5, "fullmove": 3, "color": "black", "san": "Nf6", "tag": "Book", "phase": "opening", "cpl": 2, "best_san": null, "best_uci": null, "uci": "g8f6", "eval_after_white": 12, "clock": 589.1, "move_accuracy": 99.2, "is_me": false, "wp_before": 49.1, "wp_after": 48.9, "gap_to_second_best": 44}, {"ply": 6, "fullmove": 4, "color": "white", "san": "Bc4", "tag": "Good", "phase": "opening", "cpl": 26, "best_san": "Bb5", "best_uci": "f1b5", "uci": "f1c4", "eval_after_white": -14, "clock": 571.0, "move_accuracy": 89.8, "is_me": true, "wp_before": 51.1, "wp_after": 48.7, "gap_to_second_best": 2}, {"ply": 7, "fullmove": 4, "color": "black", "san": "Qe7", "tag": "Mistake", "phase": "opening", "cpl": 124, "best_san": "Nxe4", "best_uci": "f6e4", "uci": "d8e7", "eval_after_white": 110, "clock": 581.7, "move_accuracy": 60.0, "is_me": false, "wp_before": 51.3, "wp_after": 40.0, "gap_to_second_best": 25}, {"ply": 8, "fullmove": 5, "color": "white", "san": "d4", "tag": "Inaccuracy", "phase": "opening", "cpl": 54, "best_san": "O-O", "best_uci": "e1g1", "uci": "d2d4", "eval_after_white": 56, "clock": 556.8, "move_accuracy": 80.4, "is_me": true, "wp_before": 60.0, "wp_after": 55.1, "gap_to_second_best": 10}, {"ply": 9, "fullmove": 5, "color": "black", "san": "exd4", "tag": "Best", "phase": "opening", "cpl": 0, "best_san": null, "best_uci": null, "uci": "e5d4", "eval_after_white": 35, "clock": 570.0, "move_accuracy": 100.0, "is_me": false, "wp_before": 44.9, "wp_after": 46.8, "gap_to_second_best": 39}, {"ply": 10, "fullmove": 6, "color": "white", "san": "Nxd4", "tag": "Best", "phase": "opening", "cpl": 6, "best_san": null, "best_uci": null, "uci": "f3d4", "eval_after_white": 29, "clock": 553.5, "move_accuracy": 97.6, "is_me": true, "wp_before": 53.2, "wp_after": 52.7, "gap_to_second_best": 70}, {"ply": 11, "fullmove": 6, "color": "black", "san": "Qd6", "tag": "Blunder", "phase": "opening", "cpl": 235, "best_san": "Qc5", "best_uci": "e7c5", "uci": "e7d6", "eval_after_white": 264, "clock": 556.0, "move_accuracy": 40.2, "is_me": false, "wp_before": 47.3, "wp_after": 27.4, "gap_to_second_best": 1}, {"ply": 12, "fullmove": 7, "color": "white", "san": "Nd5", "tag": "Miss", "phase": "opening", "cpl": 402, "best_san": "Be3", "best_uci": "c1e3", "uci": "c3d5", "eval_after_white": -138, "clock": 527.4, "move_accuracy": 19.3, "is_me": true, "wp_before": 72.6, "wp_after": 37.6, "gap_to_second_best": 178}, {"ply": 13, "fullmove": 7, "color": "black", "san": "Rb8", "tag": "Miss", "phase": "opening", "cpl": 824, "best_san": "Nxd5", "best_uci": "f6d5", "uci": "a8b8", "eval_after_white": 686, "clock": 530.5, "move_accuracy": 6.2, "is_me": false, "wp_before": 62.4, "wp_after": 7.4, "gap_to_second_best": 248}, {"ply": 14, "fullmove": 8, "color": "white", "san": "Nxf6+", "tag": "Blunder", "phase": "opening", "cpl": 641, "best_san": "Bf4", "best_uci": "c1f4", "uci": "d5f6", "eval_after_white": 45, "clock": 524.1, "move_accuracy": 0.0, "is_me": true, "wp_before": 92.6, "wp_after": 54.1, "gap_to_second_best": 63}, {"ply": 15, "fullmove": 8, "color": "black", "san": "gxf6", "tag": "Inaccuracy", "phase": "opening", "cpl": 63, "best_san": "Qxf6", "best_uci": "d6f6", "uci": "g7f6", "eval_after_white": 108, "clock": 528.3, "move_accuracy": 77.4, "is_me": false, "wp_before": 45.9, "wp_after": 40.2, "gap_to_second_best": 43}, {"ply": 16, "fullmove": 9, "color": "white", "san": "Qd3", "tag": "Blunder", "phase": "opening", "cpl": 664, "best_san": "c3", "best_uci": "c2c3", "uci": "d1d3", "eval_after_white": -556, "clock": 497.6, "move_accuracy": 9.4, "is_me": true, "wp_before": 59.8, "wp_after": 11.4, "gap_to_second_best": 43}, {"ply": 17, "fullmove": 9, "color": "black", "san": "Nxd4", "tag": "Inaccuracy", "phase": "opening", "cpl": 84, "best_san": "Qxd4", "best_uci": "d6d4", "uci": "c6d4", "eval_after_white": -472, "clock": 525.6, "move_accuracy": 85.3, "is_me": false, "wp_before": 88.6, "wp_after": 85.0, "gap_to_second_best": 79}, {"ply": 18, "fullmove": 10, "color": "white", "san": "Be3", "tag": "Inaccuracy", "phase": "opening", "cpl": 70, "best_san": "O-O", "best_uci": "e1g1", "uci": "c1e3", "eval_after_white": -542, "clock": 490.8, "move_accuracy": 87.4, "is_me": true, "wp_before": 15.0, "wp_after": 12.0, "gap_to_second_best": 26}, {"ply": 19, "fullmove": 10, "color": "black", "san": "c5", "tag": "Mistake", "phase": "opening", "cpl": 189, "best_san": "Ne6", "best_uci": "d4e6", "uci": "c7c5", "eval_after_white": -353, "clock": 506.7, "move_accuracy": 65.2, "is_me": false, "wp_before": 88.0, "wp_after": 78.6, "gap_to_second_best": 67}, {"ply": 20, "fullmove": 11, "color": "white", "san": "c3", "tag": "Inaccuracy", "phase": "middlegame", "cpl": 58, "best_san": "O-O", "best_uci": "e1g1", "uci": "c2c3", "eval_after_white": -411, "clock": 480.9, "move_accuracy": 85.9, "is_me": true, "wp_before": 21.4, "wp_after": 18.0, "gap_to_second_best": 3}, {"ply": 21, "fullmove": 11, "color": "black", "san": "Qe5", "tag": "Blunder", "phase": "middlegame", "cpl": 747, "best_san": "Ne6", "best_uci": "d4e6", "uci": "d6e5", "eval_after_white": 336, "clock": 454.0, "move_accuracy": 4.6, "is_me": false, "wp_before": 82.0, "wp_after": 22.5, "gap_to_second_best": 75}, {"ply": 22, "fullmove": 12, "color": "white", "san": "cxd4", "tag": "Great Find", "phase": "middlegame", "cpl": 24, "best_san": null, "best_uci": null, "uci": "c3d4", "eval_after_white": 312, "clock": 476.2, "move_accuracy": 93.2, "is_me": true, "wp_before": 77.5, "wp_after": 75.9, "gap_to_second_best": 217}, {"ply": 23, "fullmove": 12, "color": "black", "san": "cxd4", "tag": "Great Find", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "c5d4", "eval_after_white": 300, "clock": 411.1, "move_accuracy": 100.0, "is_me": false, "wp_before": 24.1, "wp_after": 24.9, "gap_to_second_best": 175}, {"ply": 24, "fullmove": 13, "color": "white", "san": "Bxd4", "tag": "Best", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "e3d4", "eval_after_white": 323, "clock": 470.9, "move_accuracy": 100.0, "is_me": true, "wp_before": 75.1, "wp_after": 76.7, "gap_to_second_best": 116}, {"ply": 25, "fullmove": 13, "color": "black", "san": "Qf4", "tag": "Blunder", "phase": "middlegame", "cpl": 257, "best_san": "Bb4+", "best_uci": "f8b4", "uci": "e5f4", "eval_after_white": 580, "clock": 397.1, "move_accuracy": 56.0, "is_me": false, "wp_before": 23.3, "wp_after": 10.6, "gap_to_second_best": 66}, {"ply": 26, "fullmove": 14, "color": "white", "san": "Bxa7", "tag": "Good", "phase": "middlegame", "cpl": 23, "best_san": "O-O", "best_uci": "e1g1", "uci": "d4a7", "eval_after_white": 557, "clock": 448.6, "move_accuracy": 96.3, "is_me": true, "wp_before": 89.4, "wp_after": 88.6, "gap_to_second_best": 128}, {"ply": 27, "fullmove": 14, "color": "black", "san": "Bb4+", "tag": "Excellent", "phase": "middlegame", "cpl": 0, "best_san": "Ra8", "best_uci": "b8a8", "uci": "f8b4", "eval_after_white": 557, "clock": 387.5, "move_accuracy": 100.0, "is_me": false, "wp_before": 11.4, "wp_after": 11.4, "gap_to_second_best": 0}, {"ply": 28, "fullmove": 15, "color": "white", "san": "Kf1", "tag": "Best", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "e1f1", "eval_after_white": 557, "clock": 443.9, "move_accuracy": 100.0, "is_me": true, "wp_before": 88.6, "wp_after": 88.6, "gap_to_second_best": 109}, {"ply": 29, "fullmove": 15, "color": "black", "san": "Ra8", "tag": "Best", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "b8a8", "eval_after_white": 557, "clock": 381.7, "move_accuracy": 100.0, "is_me": false, "wp_before": 11.4, "wp_after": 11.4, "gap_to_second_best": 46}, {"ply": 30, "fullmove": 16, "color": "white", "san": "Be3", "tag": "Best", "phase": "middlegame", "cpl": 23, "best_san": null, "best_uci": null, "uci": "a7e3", "eval_after_white": 534, "clock": 435.6, "move_accuracy": 96.1, "is_me": true, "wp_before": 88.6, "wp_after": 87.7, "gap_to_second_best": 122}, {"ply": 31, "fullmove": 16, "color": "black", "san": "Qe5", "tag": "Best", "phase": "middlegame", "cpl": 22, "best_san": null, "best_uci": null, "uci": "f4e5", "eval_after_white": 556, "clock": 363.7, "move_accuracy": 96.3, "is_me": false, "wp_before": 12.3, "wp_after": 11.4, "gap_to_second_best": 32}, {"ply": 32, "fullmove": 17, "color": "white", "san": "Rd1", "tag": "Mistake", "phase": "middlegame", "cpl": 170, "best_san": "Qb3", "best_uci": "d3b3", "uci": "a1d1", "eval_after_white": 386, "clock": 422.5, "move_accuracy": 69.6, "is_me": true, "wp_before": 88.6, "wp_after": 80.6, "gap_to_second_best": 85}, {"ply": 33, "fullmove": 17, "color": "black", "san": "Qxb2", "tag": "Best", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "e5b2", "eval_after_white": 364, "clock": 341.7, "move_accuracy": 100.0, "is_me": false, "wp_before": 19.4, "wp_after": 20.7, "gap_to_second_best": 43}, {"ply": 34, "fullmove": 18, "color": "white", "san": "Rb1", "tag": "Mistake", "phase": "middlegame", "cpl": 101, "best_san": "Bd4", "best_uci": "e3d4", "uci": "d1b1", "eval_after_white": 263, "clock": 390.3, "move_accuracy": 73.6, "is_me": true, "wp_before": 79.3, "wp_after": 72.5, "gap_to_second_best": 4}, {"ply": 35, "fullmove": 18, "color": "black", "san": "Qc3", "tag": "Great Find", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "b2c3", "eval_after_white": 241, "clock": 316.4, "move_accuracy": 100.0, "is_me": false, "wp_before": 27.5, "wp_after": 29.2, "gap_to_second_best": 269}, {"ply": 36, "fullmove": 19, "color": "white", "san": "Ke2", "tag": "Inaccuracy", "phase": "middlegame", "cpl": 63, "best_san": "Qd5", "best_uci": "d3d5", "uci": "f1e2", "eval_after_white": 178, "clock": 371.5, "move_accuracy": 79.8, "is_me": true, "wp_before": 70.8, "wp_after": 65.8, "gap_to_second_best": 33}, {"ply": 37, "fullmove": 19, "color": "black", "san": "Rxa2+", "tag": "Blunder", "phase": "middlegame", "cpl": 580, "best_san": "Qxd3+", "best_uci": "c3d3", "uci": "a8a2", "eval_after_white": 758, "clock": 282.4, "move_accuracy": 26.8, "is_me": false, "wp_before": 34.2, "wp_after": 5.8, "gap_to_second_best": 133}, {"ply": 38, "fullmove": 20, "color": "white", "san": "Kf3", "tag": "Miss", "phase": "middlegame", "cpl": 704, "best_san": "Bxa2", "best_uci": "c4a2", "uci": "e2f3", "eval_after_white": 54, "clock": 357.3, "move_accuracy": 0.0, "is_me": true, "wp_before": 94.2, "wp_after": 55.0, "gap_to_second_best": 700}, {"ply": 39, "fullmove": 20, "color": "black", "san": "Ra3", "tag": "Miss", "phase": "middlegame", "cpl": 187, "best_san": "Qxd3", "best_uci": "c3d3", "uci": "a2a3", "eval_after_white": 241, "clock": 255.0, "move_accuracy": 48.5, "is_me": false, "wp_before": 45.0, "wp_after": 29.2, "gap_to_second_best": 161}, {"ply": 40, "fullmove": 21, "color": "white", "san": "Rhc1", "tag": "Miss", "phase": "middlegame", "cpl": 185, "best_san": "Qd5", "best_uci": "d3d5", "uci": "h1c1", "eval_after_white": 56, "clock": 336.4, "move_accuracy": 48.9, "is_me": true, "wp_before": 70.8, "wp_after": 55.1, "gap_to_second_best": 178}, {"ply": 41, "fullmove": 21, "color": "black", "san": "Qe5", "tag": "Mistake", "phase": "middlegame", "cpl": 117, "best_san": "Qxc1", "best_uci": "c3c1", "uci": "c3e5", "eval_after_white": 173, "clock": 219.1, "move_accuracy": 62.8, "is_me": false, "wp_before": 44.9, "wp_after": 34.6, "gap_to_second_best": 101}, {"ply": 42, "fullmove": 22, "color": "white", "san": "Rxb4", "tag": "Blunder", "phase": "middlegame", "cpl": 245, "best_san": "Qd5", "best_uci": "d3d5", "uci": "b1b4", "eval_after_white": -72, "clock": 327.9, "move_accuracy": 36.4, "is_me": true, "wp_before": 65.4, "wp_after": 43.4, "gap_to_second_best": 136}, {"ply": 43, "fullmove": 22, "color": "black", "san": "Rxd3", "tag": "Best", "phase": "middlegame", "cpl": 7, "best_san": null, "best_uci": null, "uci": "a3d3", "eval_after_white": -65, "clock": 216.7, "move_accuracy": 97.2, "is_me": false, "wp_before": 56.6, "wp_after": 56.0, "gap_to_second_best": 62}, {"ply": 44, "fullmove": 23, "color": "white", "san": "Bxd3", "tag": "Best", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "c4d3", "eval_after_white": -64, "clock": 324.1, "move_accuracy": 100.0, "is_me": true, "wp_before": 44.0, "wp_after": 44.1, "gap_to_second_best": 607}, {"ply": 45, "fullmove": 23, "color": "black", "san": "Qh5+", "tag": "Inaccuracy", "phase": "middlegame", "cpl": 63, "best_san": "O-O", "best_uci": "e8g8", "uci": "e5h5", "eval_after_white": -1, "clock": 209.4, "move_accuracy": 77.1, "is_me": false, "wp_before": 55.9, "wp_after": 50.1, "gap_to_second_best": 64}, {"ply": 46, "fullmove": 24, "color": "white", "san": "Kg3", "tag": "Blunder", "phase": "middlegame", "cpl": 914, "best_san": "g4", "best_uci": "g2g4", "uci": "f3g3", "eval_after_white": -915, "clock": 318.9, "move_accuracy": 10.4, "is_me": true, "wp_before": 49.9, "wp_after": 3.3, "gap_to_second_best": 62}, {"ply": 47, "fullmove": 24, "color": "black", "san": "Rg8+", "tag": "Best", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "h8g8", "eval_after_white": -928, "clock": 206.5, "move_accuracy": 100.0, "is_me": false, "wp_before": 96.7, "wp_after": 96.8, "gap_to_second_best": 914}, {"ply": 48, "fullmove": 25, "color": "white", "san": "Kf4", "tag": "Miss", "phase": "middlegame", "cpl": 99071, "best_san": "Bg5", "best_uci": "e3g5", "uci": "g3f4", "eval_after_white": -99999, "clock": 278.2, "move_accuracy": 0.0, "is_me": true, "wp_before": 3.2, "wp_after": 2.5, "gap_to_second_best": 99071}, {"ply": 49, "fullmove": 25, "color": "black", "san": "Rg5", "tag": "Blunder", "phase": "middlegame", "cpl": 100277, "best_san": "Qg4#", "best_uci": "h5g4", "uci": "g8g5", "eval_after_white": 278, "clock": 196.6, "move_accuracy": 0.0, "is_me": false, "wp_before": 97.5, "wp_after": 26.4, "gap_to_second_best": 1}, {"ply": 50, "fullmove": 26, "color": "white", "san": "g4", "tag": "Miss", "phase": "middlegame", "cpl": 100277, "best_san": "Rxc8+", "best_uci": "c1c8", "uci": "g2g4", "eval_after_white": -99999, "clock": 262.7, "move_accuracy": 1.5, "is_me": true, "wp_before": 73.6, "wp_after": 2.5, "gap_to_second_best": 278}, {"ply": 51, "fullmove": 26, "color": "black", "san": "Rxg4+", "tag": "Excellent", "phase": "middlegame", "cpl": 1, "best_san": "Qxg4#", "best_uci": "h5g4", "uci": "g5g4", "eval_after_white": -99998, "clock": 193.3, "move_accuracy": 99.8, "is_me": false, "wp_before": 97.5, "wp_after": 97.5, "gap_to_second_best": 2}, {"ply": 52, "fullmove": 27, "color": "white", "san": "Kf3", "tag": "Best", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "f4f3", "eval_after_white": -99998, "clock": 257.8, "move_accuracy": 100.0, "is_me": true, "wp_before": 2.5, "wp_after": 2.5, "gap_to_second_best": 0}, {"ply": 53, "fullmove": 27, "color": "black", "san": "Qh3+", "tag": "Blunder", "phase": "middlegame", "cpl": 100267, "best_san": "Rg6+", "best_uci": "g4g6", "uci": "h5h3", "eval_after_white": 269, "clock": 189.2, "move_accuracy": 0.0, "is_me": false, "wp_before": 97.5, "wp_after": 27.1, "gap_to_second_best": 0}, {"ply": 54, "fullmove": 28, "color": "white", "san": "Ke2", "tag": "Best", "phase": "middlegame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "f3e2", "eval_after_white": 269, "clock": 254.3, "move_accuracy": 100.0, "is_me": true, "wp_before": 72.9, "wp_after": 72.9, "gap_to_second_best": 0}, {"ply": 55, "fullmove": 28, "color": "black", "san": "Qxh2", "tag": "Miss", "phase": "middlegame", "cpl": 662, "best_san": "Kf8", "best_uci": "e8f8", "uci": "h3h2", "eval_after_white": 931, "clock": 166.6, "move_accuracy": 33.2, "is_me": false, "wp_before": 27.1, "wp_after": 3.1, "gap_to_second_best": 227}, {"ply": 56, "fullmove": 29, "color": "white", "san": "Bd2", "tag": "Miss", "phase": "middlegame", "cpl": 931, "best_san": "Rxc8+", "best_uci": "c1c8", "uci": "e3d2", "eval_after_white": 0, "clock": 236.6, "move_accuracy": 0.0, "is_me": true, "wp_before": 96.9, "wp_after": 50.0, "gap_to_second_best": 655}, {"ply": 57, "fullmove": 29, "color": "black", "san": "Rg2", "tag": "Blunder", "phase": "middlegame", "cpl": 244, "best_san": "Ke7", "best_uci": "e8e7", "uci": "g4g2", "eval_after_white": 244, "clock": 150.7, "move_accuracy": 38.1, "is_me": false, "wp_before": 50.0, "wp_after": 28.9, "gap_to_second_best": 0}, {"ply": 58, "fullmove": 30, "color": "white", "san": "Be3", "tag": "Best", "phase": "middlegame", "cpl": 7, "best_san": null, "best_uci": null, "uci": "d2e3", "eval_after_white": 237, "clock": 211.3, "move_accuracy": 97.6, "is_me": true, "wp_before": 71.1, "wp_after": 70.5, "gap_to_second_best": 0}, {"ply": 59, "fullmove": 30, "color": "black", "san": "h5", "tag": "Blunder", "phase": "middlegame", "cpl": 671, "best_san": "Qh5+", "best_uci": "h2h5", "uci": "h7h5", "eval_after_white": 908, "clock": 144.6, "move_accuracy": 30.0, "is_me": false, "wp_before": 29.5, "wp_after": 3.4, "gap_to_second_best": 23}, {"ply": 60, "fullmove": 31, "color": "white", "san": "Rd1", "tag": "Miss", "phase": "middlegame", "cpl": 1401, "best_san": "Rxc8+", "best_uci": "c1c8", "uci": "c1d1", "eval_after_white": -493, "clock": 195.8, "move_accuracy": 0.0, "is_me": true, "wp_before": 96.6, "wp_after": 14.0, "gap_to_second_best": 520}, {"ply": 61, "fullmove": 31, "color": "black", "san": "h4", "tag": "Blunder", "phase": "middlegame", "cpl": 763, "best_san": "d6", "best_uci": "d7d6", "uci": "h5h4", "eval_after_white": 270, "clock": 125.9, "move_accuracy": 4.7, "is_me": false, "wp_before": 86.0, "wp_after": 27.0, "gap_to_second_best": 75}, {"ply": 62, "fullmove": 32, "color": "white", "san": "e5", "tag": "Blunder", "phase": "middlegame", "cpl": 381, "best_san": "Rc1", "best_uci": "d1c1", "uci": "e4e5", "eval_after_white": -111, "clock": 184.2, "move_accuracy": 21.3, "is_me": true, "wp_before": 73.0, "wp_after": 39.9, "gap_to_second_best": 105}, {"ply": 63, "fullmove": 32, "color": "black", "san": "fxe5", "tag": "Mistake", "phase": "middlegame", "cpl": 111, "best_san": "Qh3", "best_uci": "h2h3", "uci": "f6e5", "eval_after_white": 0, "clock": 124.5, "move_accuracy": 63.4, "is_me": false, "wp_before": 60.1, "wp_after": 50.0, "gap_to_second_best": 8}, {"ply": 64, "fullmove": 33, "color": "white", "san": "Be4", "tag": "Miss", "phase": "middlegame", "cpl": 506, "best_san": "Rc1", "best_uci": "d1c1", "uci": "d3e4", "eval_after_white": -506, "clock": 158.5, "move_accuracy": 17.8, "is_me": true, "wp_before": 50.0, "wp_after": 13.4, "gap_to_second_best": 307}, {"ply": 65, "fullmove": 33, "color": "black", "san": "d6", "tag": "Excellent", "phase": "middlegame", "cpl": 0, "best_san": "d5", "best_uci": "d7d5", "uci": "d7d6", "eval_after_white": -516, "clock": 104.9, "move_accuracy": 100.0, "is_me": false, "wp_before": 86.6, "wp_after": 87.0, "gap_to_second_best": 86}, {"ply": 66, "fullmove": 34, "color": "white", "san": "Bxg2", "tag": "Good", "phase": "middlegame", "cpl": 16, "best_san": "Ra1", "best_uci": "d1a1", "uci": "e4g2", "eval_after_white": -532, "clock": 154.0, "move_accuracy": 97.1, "is_me": true, "wp_before": 13.0, "wp_after": 12.4, "gap_to_second_best": 0}, {"ply": 67, "fullmove": 34, "color": "black", "san": "Bg4+", "tag": "Miss", "phase": "endgame", "cpl": 1374, "best_san": "Qxg2", "best_uci": "h2g2", "uci": "c8g4", "eval_after_white": 842, "clock": 101.3, "move_accuracy": 0.0, "is_me": false, "wp_before": 87.6, "wp_after": 4.3, "gap_to_second_best": 715}, {"ply": 68, "fullmove": 35, "color": "white", "san": "Kf1", "tag": "Miss", "phase": "endgame", "cpl": 1394, "best_san": "Rxg4", "best_uci": "b4g4", "uci": "e2f1", "eval_after_white": -552, "clock": 149.6, "move_accuracy": 0.0, "is_me": true, "wp_before": 95.7, "wp_after": 11.6, "gap_to_second_best": 863}, {"ply": 69, "fullmove": 35, "color": "black", "san": "Bxd1", "tag": "Best", "phase": "endgame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "g4d1", "eval_after_white": -601, "clock": 99.2, "move_accuracy": 100.0, "is_me": false, "wp_before": 88.4, "wp_after": 90.1, "gap_to_second_best": 552}, {"ply": 70, "fullmove": 36, "color": "white", "san": "Rb1", "tag": "Blunder", "phase": "endgame", "cpl": 330, "best_san": "Bxb7", "best_uci": "g2b7", "uci": "b4b1", "eval_after_white": -931, "clock": 134.1, "move_accuracy": 34.0, "is_me": true, "wp_before": 9.9, "wp_after": 3.1, "gap_to_second_best": 22}, {"ply": 71, "fullmove": 36, "color": "black", "san": "Bg4", "tag": "Blunder", "phase": "endgame", "cpl": 280, "best_san": "Bc2", "best_uci": "d1c2", "uci": "d1g4", "eval_after_white": -651, "clock": 87.4, "move_accuracy": 44.0, "is_me": false, "wp_before": 96.9, "wp_after": 91.7, "gap_to_second_best": 26}, {"ply": 72, "fullmove": 37, "color": "white", "san": "Rxb7", "tag": "Mistake", "phase": "endgame", "cpl": 180, "best_san": "Bxb7", "best_uci": "g2b7", "uci": "b1b7", "eval_after_white": -831, "clock": 118.9, "move_accuracy": 64.0, "is_me": true, "wp_before": 8.3, "wp_after": 4.5, "gap_to_second_best": 49}, {"ply": 73, "fullmove": 37, "color": "black", "san": "Be2+", "tag": "Excellent", "phase": "endgame", "cpl": 0, "best_san": "Bh3", "best_uci": "g4h3", "uci": "g4e2", "eval_after_white": -840, "clock": 71.7, "move_accuracy": 100.0, "is_me": false, "wp_before": 95.5, "wp_after": 95.7, "gap_to_second_best": 0}, {"ply": 74, "fullmove": 38, "color": "white", "san": "Kxe2", "tag": "Best", "phase": "endgame", "cpl": 3, "best_san": null, "best_uci": null, "uci": "f1e2", "eval_after_white": -843, "clock": 115.8, "move_accuracy": 99.4, "is_me": true, "wp_before": 4.3, "wp_after": 4.3, "gap_to_second_best": 16}, {"ply": 75, "fullmove": 38, "color": "black", "san": "Qxg2", "tag": "Best", "phase": "endgame", "cpl": 8, "best_san": null, "best_uci": null, "uci": "h2g2", "eval_after_white": -835, "clock": 69.7, "move_accuracy": 98.4, "is_me": false, "wp_before": 95.7, "wp_after": 95.6, "gap_to_second_best": 777}, {"ply": 76, "fullmove": 39, "color": "white", "san": "Rb8+", "tag": "Best", "phase": "endgame", "cpl": 5, "best_san": null, "best_uci": null, "uci": "b7b8", "eval_after_white": -840, "clock": 113.1, "move_accuracy": 99.0, "is_me": true, "wp_before": 4.4, "wp_after": 4.3, "gap_to_second_best": 0}, {"ply": 77, "fullmove": 39, "color": "black", "san": "Ke7", "tag": "Excellent", "phase": "endgame", "cpl": 0, "best_san": "Kd7", "best_uci": "e8d7", "uci": "e8e7", "eval_after_white": -853, "clock": 68.6, "move_accuracy": 100.0, "is_me": false, "wp_before": 95.7, "wp_after": 95.9, "gap_to_second_best": 36}, {"ply": 78, "fullmove": 40, "color": "white", "san": "Rb7+", "tag": "Blunder", "phase": "endgame", "cpl": 208, "best_san": "Bd2", "best_uci": "e3d2", "uci": "b8b7", "eval_after_white": -1061, "clock": 110.1, "move_accuracy": 58.4, "is_me": true, "wp_before": 4.1, "wp_after": 2.5, "gap_to_second_best": 1}, {"ply": 79, "fullmove": 40, "color": "black", "san": "Ke6", "tag": "Miss", "phase": "endgame", "cpl": 175, "best_san": "Qxb7", "best_uci": "g2b7", "uci": "e7e6", "eval_after_white": -886, "clock": 67.6, "move_accuracy": 65.0, "is_me": false, "wp_before": 97.5, "wp_after": 96.3, "gap_to_second_best": 191}, {"ply": 80, "fullmove": 41, "color": "white", "san": "Rb1", "tag": "Good", "phase": "endgame", "cpl": 26, "best_san": "Rb8", "best_uci": "b7b8", "uci": "b7b1", "eval_after_white": -912, "clock": 94.8, "move_accuracy": 94.8, "is_me": true, "wp_before": 3.7, "wp_after": 3.4, "gap_to_second_best": 20}, {"ply": 81, "fullmove": 41, "color": "black", "san": "h3", "tag": "Best", "phase": "endgame", "cpl": 0, "best_san": null, "best_uci": null, "uci": "h4h3", "eval_after_white": -929, "clock": 66.5, "move_accuracy": 100.0, "is_me": false, "wp_before": 96.6, "wp_after": 96.8, "gap_to_second_best": 13}], "facts": {"8": {"fen_before": "r1b1kb1r/ppppqppp/2n2n2/4p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 5", "material_before": {"white": "P8N2B2R2Q1", "black": "P8N2B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": []}, "best_move": {"san": "O-O", "line": "O-O d6 h3 Be6 Bb5 a6 Bxc6+ bxc6", "mate_in": null, "opponent_legal_replies": ["Rg8", "Kd8", "Rb8", "Qd8", "Qe6", "Qd6", "Qc5", "Qb4", "Qa3", "Ng8", "Nh5", "Nd5", "... 29 total"], "reply_forced": false}, "played_move": "d4", "actual_next": "exd4 Nxd4 Qd6 Nd5", "after_my_move": {"opponent_best_line": "exd4 Nxd4 d5 Bb5 Bd7 O-O Nxd4 Qxd4", "my_loose_pieces": [], "opponent_checking_captures": [], "my_pinned_pieces": [], "mate_against_me_in": null}}, "12": {"fen_before": "r1b1kb1r/pppp1ppp/2nq1n2/8/2BNP3/2N5/PPP2PPP/R1BQK2R w KQkq - 1 7", "material_before": {"white": "P7N2B2R2Q1", "black": "P7N2B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": []}, "best_move": {"san": "Be3", "line": "Be3 Qb4 Bb3 Nxe4 O-O Nxc3 bxc3 Qd6", "mate_in": null, "opponent_legal_replies": ["Rg8", "Be7", "Kd8", "Ke7", "Rb8", "Ng8", "Nh5", "Nd5", "Ng4", "Nxe4", "Qe7", "Qe6", "... 36 total"], "reply_forced": false}, "played_move": "Nd5", "actual_next": "Rb8 Nxf6+ gxf6 Qd3", "after_my_move": {"opponent_best_line": "Nxd5 exd5 Qb4+ c3 Qxc4 dxc6 dxc6 Bf4", "my_loose_pieces": [{"piece": "Pe4", "capturable_by": ["Nxe4"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": [], "my_pinned_pieces": [], "mate_against_me_in": null}}, "14": {"fen_before": "1rb1kb1r/pppp1ppp/2nq1n2/3N4/2BNP3/8/PPP2PPP/R1BQK2R w KQk - 3 8", "material_before": {"white": "P7N2B2R2Q1", "black": "P7N2B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [{"piece": "Pe4", "capturable_by": ["Nxe4"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "checking_captures_if_I_pass": []}, "best_move": {"san": "Bf4", "line": "Bf4 Ne5 Nf5 Qc6 Bxe5 Qxc4 Nfe3 Qa4", "mate_in": null, "opponent_legal_replies": ["Rg8", "Be7", "Kd8", "Ra8", "Ng8", "Nh5", "Nxd5", "Ng4", "Nxe4", "Qe7", "Qe6", "Qe5", "... 31 total"], "reply_forced": false}, "played_move": "Nxf6+", "actual_next": "gxf6 Qd3 Nxd4 Be3", "after_my_move": {"opponent_best_line": "Qxf6 Nb5 Bb4+ c3 Ba5 O-O a6 Nd4", "my_loose_pieces": [{"piece": "Nf6", "capturable_by": ["Qxf6", "gxf6"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": [], "my_pinned_pieces": [], "mate_against_me_in": null}}, "16": {"fen_before": "1rb1kb1r/pppp1p1p/2nq1p2/8/2BNP3/8/PPP2PPP/R1BQK2R w KQk - 0 9", "material_before": {"white": "P7N1B2R2Q1", "black": "P7N1B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": []}, "best_move": {"san": "c3", "line": "c3 Nxd4 Qxd4 Qxd4 cxd4 Bb4+ Ke2 Rg8", "mate_in": null, "opponent_legal_replies": ["Rg8", "Bg7", "Be7", "Bh6", "Kd8", "Ke7", "Ra8", "Qe7", "Qe6", "Qe5", "Qd5", "Qc5", "... 31 total"], "reply_forced": false}, "played_move": "Qd3", "actual_next": "Nxd4 Be3 c5 c3", "after_my_move": {"opponent_best_line": "Qxd4 Qe2 Bb4+ Kf1 Ne5 Bb3 Bc5 f4", "my_loose_pieces": [], "opponent_checking_captures": [], "my_pinned_pieces": [], "mate_against_me_in": null}}, "18": {"fen_before": "1rb1kb1r/pppp1p1p/3q1p2/8/2BnP3/3Q4/PPP2PPP/R1B1K2R w KQk - 0 10", "material_before": {"white": "P7N0B2R2Q1", "black": "P7N1B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Nxc2+"]}, "best_move": {"san": "O-O", "line": "O-O Rg8 Bd5 Ne6 Be3 c6 g3 b5", "mate_in": null, "opponent_legal_replies": ["Rg8", "Bg7", "Be7", "Bh6", "Kd8", "Ke7", "Ra8", "Qe7", "Qe6", "Qc6", "Qb6", "Qa6", "... 37 total"], "reply_forced": false}, "played_move": "Be3", "actual_next": "c5 c3 Qe5 cxd4", "after_my_move": {"opponent_best_line": "Ne6 Bd5 Nf4 Bxf4 Qxf4 g3 Qh6 Qb3", "my_loose_pieces": [], "opponent_checking_captures": ["Nxc2+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "20": {"fen_before": "1rb1kb1r/pp1p1p1p/3q1p2/2p5/2BnP3/3QB3/PPP2PPP/R3K2R w KQk - 0 11", "material_before": {"white": "P7N0B2R2Q1", "black": "P7N1B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Nxc2+"]}, "best_move": {"san": "O-O", "line": "O-O Rg8 Kh1 b5 Bd5 Bb7 Rae1 Kd8", "mate_in": null, "opponent_legal_replies": ["Rg8", "Bg7", "Be7", "Bh6", "Kd8", "Ke7", "Ra8", "Qe7", "Qc7", "Qe6", "Qc6", "Qb6", "... 33 total"], "reply_forced": false}, "played_move": "c3", "actual_next": "Qe5 cxd4 cxd4 Bxd4", "after_my_move": {"opponent_best_line": "Ne6 Qe2 b5 Rd1 Qc7 Bxb5 Bd6 g3", "my_loose_pieces": [], "opponent_checking_captures": [], "my_pinned_pieces": [], "mate_against_me_in": null}}, "22": {"fen_before": "1rb1kb1r/pp1p1p1p/5p2/2p1q3/2BnP3/2PQB3/PP3PPP/R3K2R w KQk - 1 12", "material_before": {"white": "P7N0B2R2Q1", "black": "P7N1B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": []}, "best_move": {"san": "cxd4", "line": "cxd4 cxd4 Bxd4 Bb4+ Ke2 Qh5+ f3 O-O", "mate_in": null, "opponent_legal_replies": ["Rg8", "Bg7", "Be7", "Bh6", "Bd6", "Kd8", "Ke7", "Ra8", "Qe7", "Qc7", "Qe6", "Qd6", "... 31 total"], "reply_forced": false}, "played_move": "cxd4", "actual_next": "cxd4 Bxd4 Qf4 Bxa7", "after_my_move": {"opponent_best_line": "cxd4 Bxd4 Bb4+ Ke2 Qh5+ f3 O-O g4", "my_loose_pieces": [], "opponent_checking_captures": [], "my_pinned_pieces": [], "mate_against_me_in": null}}, "32": {"fen_before": "r1b1k2r/1p1p1p1p/5p2/4q3/1bB1P3/3QB3/PP3PPP/R4K1R w k - 5 17", "material_before": {"white": "P6N0B2R2Q1", "black": "P5N0B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [{"piece": "Pb2", "capturable_by": ["Qxb2"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "checking_captures_if_I_pass": []}, "best_move": {"san": "Qb3", "line": "Qb3 Bd6 Bxf7+ Ke7 Rd1 b6 f4 Qa5", "mate_in": null, "opponent_legal_replies": ["Rg8", "Rf8", "Kf8", "Kd8", "Ke7", "Rb8", "Ra7", "Ra6", "Ra5", "Ra4", "Ra3", "Rxa2", "... 48 total"], "reply_forced": false}, "played_move": "Rd1", "actual_next": "Qxb2 Rb1 Qc3 Ke2", "after_my_move": {"opponent_best_line": "Qxb2 Bd4 Qa3 Qe2 Bc5 Bxf6 Rg8 Bb2", "my_loose_pieces": [{"piece": "Pb2", "capturable_by": ["Qxb2"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": [], "my_pinned_pieces": [], "mate_against_me_in": null}}, "34": {"fen_before": "r1b1k2r/1p1p1p1p/5p2/8/1bB1P3/3QB3/Pq3PPP/3R1K1R w k - 0 18", "material_before": {"white": "P5N0B2R2Q1", "black": "P5N0B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Qxf2+"]}, "best_move": {"san": "Bd4", "line": "Bd4 Qa3 Qe2 b6 Bxf6 Rg8 g3 Ba6", "mate_in": null, "opponent_legal_replies": ["Rg8", "Rf8", "Kf8", "Kd8", "Ke7", "Rb8", "Ra7", "Ra6", "Ra5", "Ra4", "Ra3", "Rxa2", "... 41 total"], "reply_forced": false}, "played_move": "Rb1", "actual_next": "Qc3 Ke2 Rxa2+ Kf3", "after_my_move": {"opponent_best_line": "Qc3 Qd5 O-O Ke2 Qc2+ Kf3 Ba3 Bd4", "my_loose_pieces": [], "opponent_checking_captures": ["Qxb1+", "Qxf2+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "36": {"fen_before": "r1b1k2r/1p1p1p1p/5p2/8/1bB1P3/2qQB3/P4PPP/1R3K1R w k - 2 19", "material_before": {"white": "P5N0B2R2Q1", "black": "P5N0B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Qxd3+"]}, "best_move": {"san": "Qd5", "line": "Qd5 O-O Ke2 Qc2+ Kf3 Ba3 Bd4 Qd2", "mate_in": null, "opponent_legal_replies": ["Rg8", "Rf8", "Kf8", "Kd8", "Ke7", "Rb8", "Ra7", "Ra6", "Ra5", "Ra4", "Ra3", "Rxa2", "... 38 total"], "reply_forced": false}, "played_move": "Ke2", "actual_next": "Rxa2+ Kf3 Ra3 Rhc1", "after_my_move": {"opponent_best_line": "Qxd3+ Kxd3 Ba3 Bd5 Ra4 Rb5 d6 Kc2", "my_loose_pieces": [], "opponent_checking_captures": ["Qxd3+", "Rxa2+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "38": {"fen_before": "2b1k2r/1p1p1p1p/5p2/8/1bB1P3/2qQB3/r3KPPP/1R5R w k - 0 20", "material_before": {"white": "P4N0B2R2Q1", "black": "P5N0B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": null, "best_move": {"san": "Bxa2", "line": "Bxa2 Qxd3+ Kxd3 Bd6 Bd4 Rg8 Bb6 Bb8", "mate_in": null, "opponent_legal_replies": ["Rg8", "Rf8", "Kf8", "Kd8", "Ke7", "Bf8", "Be7", "Bd6", "Bc5", "Ba5", "Ba3", "Qc7", "... 34 total"], "reply_forced": false}, "played_move": "Kf3", "actual_next": "Ra3 Rhc1 Qe5 Rxb4", "after_my_move": {"opponent_best_line": "Qxd3 Bxd3 Bd6 Rhd1 Ra3 Ke2 Ra5 Bb6", "my_loose_pieces": [], "opponent_checking_captures": ["Rxf2+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "40": {"fen_before": "2b1k2r/1p1p1p1p/5p2/8/1bB1P3/r1qQBK2/5PPP/1R5R w k - 2 21", "material_before": {"white": "P4N0B2R2Q1", "black": "P5N0B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": []}, "best_move": {"san": "Qd5", "line": "Qd5 O-O Rhc1 Qd2 Qh5 b6 Rb3 Qd6", "mate_in": null, "opponent_legal_replies": ["Rg8", "Rf8", "Kf8", "Kd8", "Ke7", "Bf8", "Be7", "Bd6", "Bc5", "Ba5", "Qe5", "Qd4", "... 37 total"], "reply_forced": false}, "played_move": "Rhc1", "actual_next": "Qe5 Rxb4 Rxd3 Bxd3", "after_my_move": {"opponent_best_line": "Qxc1 Rxc1 Rxd3 Bxd3 O-O Bd4 Be7 Bb5", "my_loose_pieces": [], "opponent_checking_captures": [], "my_pinned_pieces": [], "mate_against_me_in": null}}, "42": {"fen_before": "2b1k2r/1p1p1p1p/5p2/4q3/1bB1P3/r2QBK2/5PPP/1RR5 w k - 4 22", "material_before": {"white": "P4N0B2R2Q1", "black": "P5N0B2R2Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [{"piece": "Qd3", "capturable_by": ["Rxd3"], "legal_recapture_by": ["c4"], "static_defenders_that_cannot_recapture": []}, {"piece": "Ph2", "capturable_by": ["Qxh2"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "checking_captures_if_I_pass": ["Qxe4+"]}, "best_move": {"san": "Qd5", "line": "Qd5 Bc5 Qxc5 Qxc5 Bxf7+ Kxf7 Rxc5 Ra6", "mate_in": null, "opponent_legal_replies": ["Rg8", "Rf8", "Kf8", "Kd8", "Ke7", "Qb8", "Qe7", "Qc7", "Qe6", "Qd6", "Qh5+", "Qg5", "... 48 total"], "reply_forced": false}, "played_move": "Rxb4", "actual_next": "Rxd3 Bxd3 Qh5+ Kg3", "after_my_move": {"opponent_best_line": "Rxd3 Bxd3 O-O Rbc4 Qb8 h3 b5 Rb1", "my_loose_pieces": [{"piece": "Qd3", "capturable_by": ["Rxd3"], "legal_recapture_by": ["c4"], "static_defenders_that_cannot_recapture": []}, {"piece": "Ph2", "capturable_by": ["Qxh2"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": ["Qxe4+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "46": {"fen_before": "2b1k2r/1p1p1p1p/5p2/7q/1R2P3/3BBK2/5PPP/2R5 w k - 1 24", "material_before": {"white": "P4N0B2R2Q0", "black": "P5N0B1R1Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": null, "best_move": {"san": "g4", "line": "g4 Qh3+ Ke2 O-O Rbc4 Qxg4+ f3 Qg2+", "mate_in": null, "opponent_legal_replies": ["Rg8", "Rf8", "Kf8", "Kd8", "Ke7", "Qh6", "Qg6", "Qg5", "Qf5+", "Qe5", "Qd5", "Qc5", "... 25 total"], "reply_forced": false}, "played_move": "Kg3", "actual_next": "Rg8+ Kf4 Rg5 g4", "after_my_move": {"opponent_best_line": "Rg8+ Bg5 Qxg5+ Kf3 Qxc1 Ke2 Ke7 Rc4", "my_loose_pieces": [], "opponent_checking_captures": ["Qxh2+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "48": {"fen_before": "2b1k1r1/1p1p1p1p/5p2/7q/1R2P3/3BB1K1/5PPP/2R5 w - - 3 25", "material_before": {"white": "P4N0B2R2Q0", "black": "P5N0B1R1Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": null, "best_move": {"san": "Bg5", "line": "Bg5 Qxg5+ Kf3 Qxc1 Ke2 Ke7 Rc4", "mate_in": null, "opponent_legal_replies": ["Rh8", "Rf8", "Rg7", "Rg6", "Rxg5+", "Kf8", "Kd8", "Ke7", "Qh6", "Qg6", "Qxg5+", "Qh4+", "... 25 total"], "reply_forced": false}, "played_move": "Kf4", "actual_next": "Rg5 g4 Rxg4+ Kf3", "after_my_move": {"opponent_best_line": "Qg4#", "my_loose_pieces": [{"piece": "Ph2", "capturable_by": ["Qxh2+"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}, {"piece": "Pg2", "capturable_by": ["Rxg2"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": ["Qxh2+"], "my_pinned_pieces": [], "mate_against_me_in": -1}}, "50": {"fen_before": "2b1k3/1p1p1p1p/5p2/6rq/1R2PK2/3BB3/5PPP/2R5 w - - 5 26", "material_before": {"white": "P4N0B2R2Q0", "black": "P5N0B1R1Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [{"piece": "Ph2", "capturable_by": ["Qxh2+"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}, {"piece": "Pg2", "capturable_by": ["Rxg2"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "checking_captures_if_I_pass": ["Qxh2+"]}, "best_move": {"san": "Rxc8+", "line": "Rxc8+ Ke7 h3 Qh4+ Kf3 Qh5+ g4 Qxh3+", "mate_in": null, "opponent_legal_replies": ["Ke7"], "reply_forced": true}, "played_move": "g4", "actual_next": "Rxg4+ Kf3 Qh3+ Ke2", "after_my_move": {"opponent_best_line": "Qxg4#", "my_loose_pieces": [{"piece": "Pg4", "capturable_by": ["Qxg4#", "Rxg4+"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": ["f4"]}, {"piece": "Ph2", "capturable_by": ["Qxh2+"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": ["Qxg4#", "Qxh2+", "Rxg4+"], "my_pinned_pieces": [], "mate_against_me_in": -1}}, "56": {"fen_before": "2b1k3/1p1p1p1p/5p2/8/1R2P1r1/3BB3/4KP1q/2R5 w - - 0 29", "material_before": {"white": "P2N0B2R2Q0", "black": "P5N0B1R1Q1"}, "my_pinned_pieces_before": ["Pf2"], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Qxf2+"]}, "best_move": {"san": "Rxc8+", "line": "Rxc8+ Ke7 Bc5+ Qd6 Bxd6+ Kxd6 Rb6+ Ke7", "mate_in": null, "opponent_legal_replies": ["Ke7"], "reply_forced": true}, "played_move": "Bd2", "actual_next": "Rg2 Be3 h5 Rd1", "after_my_move": {"opponent_best_line": "Ke7 Rxc8 Qh5 Ke3 Qh6+ Ke2", "my_loose_pieces": [], "opponent_checking_captures": ["Qxf2+", "Rxe4+"], "my_pinned_pieces": ["Pf2"], "mate_against_me_in": null}}, "60": {"fen_before": "2b1k3/1p1p1p2/5p2/7p/1R2P3/3BB3/4KPrq/2R5 w - - 0 31", "material_before": {"white": "P2N0B2R2Q0", "black": "P5N0B1R1Q1"}, "my_pinned_pieces_before": ["Pf2"], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Rxf2+"]}, "best_move": {"san": "Rxc8+", "line": "Rxc8+ Ke7 Bc5+ Qd6 Bxd6+ Kxd6 Rb6+ Ke5", "mate_in": null, "opponent_legal_replies": ["Ke7"], "reply_forced": true}, "played_move": "Rd1", "actual_next": "h4 e5 fxe5 Be4", "after_my_move": {"opponent_best_line": "d6 Rdb1 Bg4+ Kd2 Rxf2+ Bxf2 Qxf2+ Kc3", "my_loose_pieces": [], "opponent_checking_captures": ["Rxf2+"], "my_pinned_pieces": ["Pf2"], "mate_against_me_in": null}}, "62": {"fen_before": "2b1k3/1p1p1p2/5p2/8/1R2P2p/3BB3/4KPrq/3R4 w - - 0 32", "material_before": {"white": "P2N0B2R2Q0", "black": "P5N0B1R1Q1"}, "my_pinned_pieces_before": ["Pf2"], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Rxf2+"]}, "best_move": {"san": "Rc1", "line": "Rc1 Kf8 Rxc8+ Kg7 Ra4 Rg3 Raa8 Rxe3+", "mate_in": null, "opponent_legal_replies": ["Kf8", "Kd8", "Ke7", "Qb8", "Qc7", "Qd6", "Qe5", "Qf4", "Qh3", "Qg3", "Qh1", "Qg1", "... 26 total"], "reply_forced": false}, "played_move": "e5", "actual_next": "fxe5 Be4 d6 Bxg2", "after_my_move": {"opponent_best_line": "Qh3 Rc1 d6 exd6 Kf8 Kd2 Rg5 Bxg5", "my_loose_pieces": [{"piece": "Pe5", "capturable_by": ["Qxe5", "fxe5"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": ["Rxf2+"], "my_pinned_pieces": ["Pf2"], "mate_against_me_in": null}}, "64": {"fen_before": "2b1k3/1p1p1p2/8/4p3/1R5p/3BB3/4KPrq/3R4 w - - 0 33", "material_before": {"white": "P1N0B2R2Q0", "black": "P5N0B1R1Q1"}, "my_pinned_pieces_before": ["Pf2"], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Rxf2+"]}, "best_move": {"san": "Rc1", "line": "Rc1 Qh3 Rxc8+ Ke7 Rb6 Qg4+ Kd2 Rg1", "mate_in": null, "opponent_legal_replies": ["Kf8", "Kd8", "Ke7", "Qf4", "Qh3", "Qg3", "Qh1", "Qg1", "Rg8", "Rg7", "Rg6", "Rg5", "... 24 total"], "reply_forced": false}, "played_move": "Be4", "actual_next": "d6 Bxg2 Bg4+ Kf1", "after_my_move": {"opponent_best_line": "d5 Bxd5 Rg1 Rxg1 Qxg1 Rxh4 Bg4+ f3", "my_loose_pieces": [], "opponent_checking_captures": ["Rxf2+"], "my_pinned_pieces": ["Pf2"], "mate_against_me_in": null}}, "68": {"fen_before": "4k3/1p3p2/3p4/4p3/1R4bp/4B3/4KPBq/3R4 w - - 1 35", "material_before": {"white": "P1N0B2R2Q0", "black": "P5N0B1R0Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": null, "best_move": {"san": "Rxg4", "line": "Rxg4 Ke7 Rh1 h3 Bd5 Qxh1 Bxh1 Kf6", "mate_in": null, "opponent_legal_replies": ["Kf8", "Kd8", "Ke7", "Kd7", "Qf4", "Qh3", "Qg3", "Qxg2", "Qh1", "Qg1", "f6", "b6", "... 17 total"], "reply_forced": false}, "played_move": "Kf1", "actual_next": "Bxd1 Rb1 Bg4 Rxb7", "after_my_move": {"opponent_best_line": "Bxd1 Bxb7 Bc2 Bd5 Kf8 Bf3 Bd3+ Ke1", "my_loose_pieces": [{"piece": "Rd1", "capturable_by": ["Bxd1"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": ["Qxg2+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "70": {"fen_before": "4k3/1p3p2/3p4/4p3/1R5p/4B3/5PBq/3b1K2 w - - 0 36", "material_before": {"white": "P1N0B2R1Q0", "black": "P5N0B1R0Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Qxg2+"]}, "best_move": {"san": "Bxb7", "line": "Bxb7 Bc2 Bf3 Bd3+ Ke1 Qh3 Bd1 Qf1+", "mate_in": null, "opponent_legal_replies": ["Kf8", "Kd8", "Ke7", "Kd7", "Qf4", "Qh3+", "Qg3", "Qg2+", "Qxf2+", "Qh1+", "Qg1+", "Bh5", "... 23 total"], "reply_forced": false}, "played_move": "Rb1", "actual_next": "Bg4 Rxb7 Be2+ Kxe2", "after_my_move": {"opponent_best_line": "Bc2 Bxb7 Bd3+ Ke1 Qg1+ Kd2 Qxb1 Bf3", "my_loose_pieces": [], "opponent_checking_captures": ["Qxg2+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "72": {"fen_before": "4k3/1p3p2/3p4/4p3/6bp/4B3/5PBq/1R3K2 w - - 2 37", "material_before": {"white": "P1N0B2R1Q0", "black": "P5N0B1R0Q1"}, "my_pinned_pieces_before": [], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Qxg2+"]}, "best_move": {"san": "Bxb7", "line": "Bxb7 Bf5 Rb3 Kf8 Bg5 Kg7 Bg2 Be6", "mate_in": null, "opponent_legal_replies": ["Kf8", "Kd8", "Ke7", "Kd7", "Bc8", "Bd7", "Be6", "Bh5", "Bf5", "Bh3+", "Bf3", "Be2+", "... 25 total"], "reply_forced": false}, "played_move": "Rxb7", "actual_next": "Be2+ Kxe2 Qxg2 Rb8+", "after_my_move": {"opponent_best_line": "Bh3 Rb8+ Kd7 Bxh3+ Qxh3+ Ke2 Qg2 Rh8", "my_loose_pieces": [], "opponent_checking_captures": ["Qxg2+"], "my_pinned_pieces": [], "mate_against_me_in": null}}, "78": {"fen_before": "1R6/4kp2/3p4/4p3/7p/4B3/4KPq1/8 w - - 2 40", "material_before": {"white": "P1N0B1R1Q0", "black": "P4N0B0R0Q1"}, "my_pinned_pieces_before": ["Pf2"], "opponent_could_have_played_before_my_move": {"my_loose_pieces_if_I_pass": [], "checking_captures_if_I_pass": ["Qxf2+"]}, "best_move": {"san": "Bd2", "line": "Bd2 h3 Rh8 Kd7 Ke3 h2 Rh7 Kc6", "mate_in": null, "opponent_legal_replies": ["Kd7", "Kf6", "Ke6", "Qg8", "Qa8", "Qg7", "Qb7", "Qg6", "Qc6", "Qg5", "Qd5", "Qg4+", "... 26 total"], "reply_forced": false}, "played_move": "Rb7+", "actual_next": "Ke6 Rb1 h3", "after_my_move": {"opponent_best_line": "Qxb7 f4 h3 fxe5 Qg2+ Kd3 dxe5 Bc5+", "my_loose_pieces": [{"piece": "Rb7", "capturable_by": ["Qxb7"], "legal_recapture_by": [], "static_defenders_that_cannot_recapture": []}], "opponent_checking_captures": [], "my_pinned_pieces": ["Pf2"], "mate_against_me_in": null}}}, "motifs": {"missed": [], "opponent": [{"ply": 9, "motifs": ["pin", "discovered attack"], "san": "exd4"}, {"ply": 35, "motifs": ["fork"], "san": "Qc3"}, {"ply": 43, "motifs": ["pin"], "san": "Rxd3"}, {"ply": 75, "motifs": ["pin"], "san": "Qxg2"}]}, "engine": {"depth": 16, "multipv": 2}};
+const NOTES = {};
+// ROLLING comes from the newest saved bulk_review.py batch (see
+// review.py's find_latest_batch) — not recomputed live, so it can lag
+// a few games behind. { available:false } when no batch data exists yet.
+const ROLLING = {"available": true, "n_games": 50, "avg_accuracy": 85.2, "blunders_per_game": 5.32, "mistakes_per_game": 3.58, "inaccuracies_per_game": 4.02, "source_label": "2026.09.12-2026.09.15"};
+// H2H: prior games vs. this same opponent from chess.com's archives (see
+// head_to_head.py). { available:false } offline or on a pasted PGN; a first
+// meeting (n == 0) hides the callout the same way.
+const H2H = {"available": false};
+const GENERATED = "2026-09-24";
+const GAME_ID = "174497298258";
+
+(function () {
+  const H = REVIEW.headers, me = REVIEW.my_color, ann = REVIEW.annotations;
+  const oppName = me === "white" ? H.Black : H.White;
+  const myName = me === "white" ? H.White : H.Black;
+  const myElo = me === "white" ? H.WhiteElo : H.BlackElo;
+  const oppElo = me === "white" ? H.BlackElo : H.WhiteElo;
+  // Board name plate (static per game, set once) — same White/Black-vs-me
+  // mapping used everywhere else on the page, just surfaced next to the
+  // board itself now that the clock/material row grew into a full bar.
+  document.getElementById("bpbNameOpp").textContent = oppName || "opponent";
+  document.getElementById("bpbEloOpp").textContent = oppElo ? `(${oppElo})` : "";
+  document.getElementById("bpbNameMe").textContent = myName || "aetrone";
+  document.getElementById("bpbEloMe").textContent = myElo ? `(${myElo})` : "";
+  const result = H.Result === "1-0" ? (me === "white" ? "win" : "loss") : H.Result === "0-1" ? (me === "black" ? "win" : "loss") : "draw";
+  const myAcc = REVIEW.accuracy[me], oppAcc = REVIEW.accuracy[me === "white" ? "black" : "white"];
+
+  const mine = ann.filter(a => a.is_me);
+  const flaggedTags = new Set(["Blunder", "Miss", "Mistake", "Inaccuracy"]);
+  const greatTags = new Set(["Brilliant", "Great Find", "Excellent"]);
+  // Separate from greatTags (which only colors san text bad/good elsewhere)
+  // so widening the "Three Best Moves" pool doesn't also change how Best
+  // moves render in the speech bubble/move list — the user asked specifically
+  // to add Best to the best-moves pool, nothing about its color (2026-09-17).
+  // Great Find already siphons off any Best move with a genuinely large gap
+  // (is_best + gap>=150 => Great Find by definition), so this mostly just
+  // fills in slots on games with fewer than 3 Brilliant/Great Find/Excellent
+  // moves, rather than displacing them.
+  const bestMovesTags = new Set(["Brilliant", "Great Find", "Excellent", "Best"]);
+  const count = (t) => mine.filter(a => a.tag === t).length;
+  const totalMoves = ann[ann.length - 1].fullmove;
+
+  const TAG_RING_COLOR = {
+    Blunder: "var(--status-critical)", Miss: "var(--status-critical)",
+    Mistake: "var(--status-serious)", Inaccuracy: "var(--status-warning)",
+    Brilliant: "var(--status-info)", "Great Find": "var(--status-info)",
+    Excellent: "var(--status-good-text)", Good: "var(--status-good-text)", Best: "var(--status-good-text)",
+    Book: "var(--muted)",
+  };
+  // Fine-grained, one entry per distinct ring color actually drawn on the
+  // chart — this is the color key, so it has to match the chart exactly.
+  // Best has no best_san (same as Brilliant/Great Find) but the user wants it
+  // colored like Excellent/Good — cyan reserved for the genuinely rare
+  // Brilliant/Great Find tags. Book (added 2026-09-16) gets its own neutral
+  // color, deliberately outside the quality scale — it isn't graded at all.
+  const LEGEND_GROUPS = [
+    { label: "Blunder / Miss", color: TAG_RING_COLOR.Blunder, tags: ["Blunder", "Miss"] },
+    { label: "Mistake", color: TAG_RING_COLOR.Mistake, tags: ["Mistake"] },
+    { label: "Inaccuracy", color: TAG_RING_COLOR.Inaccuracy, tags: ["Inaccuracy"] },
+    { label: "Brilliant / Great Find", color: TAG_RING_COLOR.Brilliant, tags: ["Brilliant", "Great Find"] },
+    { label: "Excellent / Good / Best", color: TAG_RING_COLOR.Excellent, tags: ["Excellent", "Good", "Best"] },
+    { label: "Book", color: TAG_RING_COLOR.Book, tags: ["Book"] },
+  ];
+
+  document.getElementById("eyebrow").textContent = `cat game-${GAME_ID}.txt`;
+  document.getElementById("mastheadSub").innerHTML =
+    `${me} vs. <a href="${H.Link || "#"}" target="_blank" rel="noopener">${oppName}</a> (${oppElo}) · ${H.Date} · ${H.TimeControl ? H.TimeControl.replace("+", "s + ") + "s" : ""} · ${H.Termination ? `${H.Termination} (${totalMoves} moves)` : `${totalMoves} moves`}`;
+  document.getElementById("recordFigures").innerHTML = `<span class="${result[0]}">${result.toUpperCase()}</span>`;
+  document.getElementById("recordCaption").textContent = `${H.Result} · you ${myElo}`;
+
+  // ---- top tiles: each stat carries its own rolling-average comparison
+  // inline (the standalone "This Game vs. Your Rolling Average" section was
+  // retired 2026-09-17 — the user asked for the comparisons folded directly
+  // into these four tiles instead of living in a separate block below).
+  // ROLLING comes from find_latest_rolling_data in build.py; when it's
+  // unavailable, a tile just shows this game's own number, no comparison.
+  const rollingAvailable = !!(ROLLING && ROLLING.available);
+  const blundersMisses = count("Blunder") + count("Miss");
+  const mistakes = count("Mistake");
+  const inaccuracies = count("Inaccuracy");
+
+  function rollingLine(thisVal, avgVal, suffix, lowerIsBetter) {
+    if (!rollingAvailable || avgVal == null) return `<p class="sub no-data">no rolling figure yet</p>`;
+    const d = thisVal - avgVal;
+    const flat = Math.abs(d) < (suffix === "%" ? 0.3 : 0.15);
+    const better = lowerIsBetter ? d < 0 : d > 0;
+    const cls = flat ? "even" : better ? "better" : "worse";
+    const sign = d > 0 ? "+" : "";
+    return `<p class="sub">avg ${avgVal}${suffix} &middot; <span class="delta ${cls}">${flat ? "about average" : `${sign}${d.toFixed(1)}${suffix} ${better ? "better" : "worse"}`}</span></p>`;
+  }
+
+  document.getElementById("tiles").innerHTML = [
+    { label: "Accuracy", value: `${myAcc}%`,
+      extra: `${rollingLine(myAcc, ROLLING.avg_accuracy, "%", false)}<p class="sub">opponent ${oppAcc}%</p>` },
+    { label: "Mistakes", value: mistakes,
+      extra: rollingLine(mistakes, ROLLING.mistakes_per_game, "", true) },
+    { label: "Blunders + misses", value: blundersMisses,
+      extra: rollingLine(blundersMisses, ROLLING.blunders_per_game, "", true) },
+    { label: "Inaccuracies", value: inaccuracies,
+      extra: rollingLine(inaccuracies, ROLLING.inaccuracies_per_game, "", true) },
+  ].map(t => `<div class="tile"><p class="label">${t.label}</p><p class="value tabular">${t.value}</p>${t.extra}</div>`).join("");
+
+  // ---- worst / best ----
+  const swing = (a) => a.wp_before - a.wp_after;
+  // Book moves aren't graded (see review.py), so they don't compete for
+  // "worst move" either, even if the engine's raw eval swing on one looks
+  // large — same reasoning as excluding them from the accuracy average.
+  const worst = [...mine].filter(a => a.tag !== "Book").sort((a, b) => swing(b) - swing(a)).slice(0, 3);
+  const bestPool = mine.filter(a => bestMovesTags.has(a.tag));
+  const best = [...bestPool].sort((a, b) => b.gap_to_second_best - a.gap_to_second_best).slice(0, 3);
+  const worstPlies = new Set(worst.map(a => a.ply)), bestPlies = new Set(best.map(a => a.ply));
+  // Chart clicks always jump to the board replay viewer (2026-09-18, per
+  // the user — previously a worst-3/best-3 point instead jumped to its
+  // curated card below, overriding the board's own scroll; now every point
+  // behaves the same way, curated or not). worstPlies/bestPlies still marks
+  // which points get the solid-filled ring below — that's a chart styling
+  // question, unrelated to what a click does.
+
+  const mvNum = (a) => a.color === "white" ? `${a.fullmove}.` : `${a.fullmove}...`;
+  const tagCls = (t) => t.toLowerCase().replace(" ", "-");
+  const note = (a) => NOTES[a.ply] || (a.best_san ? `better was ${a.best_san}${a.best_san.includes("#") ? ", which mates" : a.best_san.includes("x") ? ", which captures" : a.best_san.includes("+") ? ", giving check" : ""}` : "");
+
+  // ---- opening name (added 2026-09-24): the longest line in Lichess's
+  // openings table the game's own move order starts with (review.py's
+  // opening_for), plus how long the game stayed in known theory. Hidden when
+  // the very first move matches nothing.
+  (function renderOpening() {
+    const o = REVIEW.opening, el = document.getElementById("openingLine");
+    if (!o) return;
+    let bookPlies = 0;
+    while (bookPlies < ann.length && ann[bookPlies].tag === "Book") bookPlies++;
+    const bookTxt = bookPlies ? ` <span class="book">&middot; book through move ${ann[bookPlies - 1].fullmove}</span>` : "";
+    el.innerHTML = `${o.eco} &middot; ${o.name}${bookTxt}`;
+    el.hidden = false;
+  })();
+
+  // ---- "what actually lost this game" (added 2026-09-24). One sentence,
+  // computed only from the win-probability curve, so it can be checked
+  // against the chart. Win% on an annotation is from the MOVER's side, so an
+  // opponent ply's win% for you is 100 - wp_after. The culprit is your own
+  // biggest non-Book swing at or before the ply where your win% fell below
+  // 50% for the last time (what actually lost it, not what happened once it
+  // was already decided). Wins and draws get the mirror-image sentence.
+  (function renderHeadline() {
+    const el = document.getElementById("headline");
+    if (!ann.length) return;
+    const myWpAfter = ann.map(a => a.is_me ? a.wp_after : 100 - a.wp_after);
+    const fmt = (a) => `<b>${mvNum(a)} ${a.san}</b> (${a.tag})`;
+    const pct = (v) => `${+Number(v).toFixed(1)}%`;
+    const biggest = (list, key) => list.reduce((m, a) => (m == null || key(a) > key(m)) ? a : m, null);
+    let kicker, cls, text;
+    if (result === "loss") {
+      kicker = "what lost this game"; cls = "";
+      // start of the final unbroken stretch spent under 50%
+      let k = ann.length; while (k > 0 && myWpAfter[k - 1] < 50) k--;
+      if (k >= ann.length) {
+        text = `You were never below 50% at the end, so the loss came from the final moves: ${fmt(biggest(mine.filter(a => a.tag !== "Book"), swing))} was your biggest drop (${pct(biggest(mine.filter(a => a.tag !== "Book"), swing).wp_before)} &rarr; ${pct(biggest(mine.filter(a => a.tag !== "Book"), swing).wp_after)}).`;
+      } else {
+        const pool = mine.filter(a => a.tag !== "Book" && a.ply <= k);
+        const c = biggest(pool, swing);
+        const stayed = ann[k].fullmove;
+        if (c && swing(c) >= 10) {
+          text = `${fmt(c)} took your win chance from <b>${pct(c.wp_before)}</b> to <b>${pct(c.wp_after)}</b>. You were under 50% from move ${stayed} on and never got back.`;
+        } else {
+          text = `No single move did it. Your win chance eroded below 50% by move ${stayed} through a run of small losses, and you never got back${c ? ` (largest single drop: ${fmt(c)}, ${pct(c.wp_before)} &rarr; ${pct(c.wp_after)})` : ""}.`;
+        }
+      }
+    } else if (result === "win") {
+      kicker = "what won this game"; cls = "win";
+      const opp = ann.filter(a => !a.is_me && a.tag !== "Book");
+      const c = biggest(opp, swing);
+      text = c && swing(c) >= 10
+        ? `${oppName}'s ${fmt(c)} was the turning point: it cost them <b>${pct(swing(c))}</b> of win chance (${pct(c.wp_before)} &rarr; ${pct(c.wp_after)} for them).`
+        : `No single decisive error: you won by keeping the position steady. Your largest drop was ${pct(Math.max(0, ...mine.filter(a => a.tag !== "Book").map(swing)))} of win chance.`;
+    } else {
+      kicker = "how this was drawn"; cls = "draw";
+      const c = biggest(mine.filter(a => a.tag !== "Book"), swing);
+      text = c ? `Your largest swing was ${fmt(c)}, ${pct(c.wp_before)} &rarr; ${pct(c.wp_after)}.` : "Nothing swung the evaluation.";
+    }
+    el.className = `headline ${cls}`.trim();
+    el.innerHTML = `<span class="kicker">${kicker}</span>${text}`;
+    el.hidden = false;
+  })();
+
+  // ---- vs. this opponent (added 2026-09-24). Record and every pattern line
+  // come from H2H.games (chess.com archives, prior games only); nothing
+  // here is engine-derived, so each line states what it counts. Hidden on a
+  // first meeting or when the archive fetch failed.
+  (function renderH2H() {
+    const el = document.getElementById("h2h");
+    if (!H2H || !H2H.available || !H2H.n) return;
+    const g = H2H.games, L = g.filter(x => x.result === "l");
+    const resCode = result === "win" ? "w" : result === "loss" ? "l" : "d";
+    const now = { w: H2H.w + (resCode === "w"), l: H2H.l + (resCode === "l"), d: H2H.d + (resCode === "d") };
+    const lines = [];
+    const word = { checkmated: "ended in checkmate", timeout: "were lost on time", resigned: "ended in resignation" };
+    // 1. how the losses ended
+    if (L.length >= 2) {
+      const by = {}; L.forEach(x => by[x.termination] = (by[x.termination] || 0) + 1);
+      const [t, c] = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+      if (word[t] && c / L.length >= 0.5 && c >= 2) lines.push(`${c} of your ${L.length} losses to them ${word[t]}.`);
+    }
+    // 2. losses concentrated in one color
+    if (L.length >= 3) {
+      const wl = L.filter(x => x.color === "white").length, bl = L.length - wl;
+      const [col, c] = wl >= bl ? ["White", wl] : ["Black", bl];
+      if (c / L.length >= 0.75) lines.push(`${c} of your ${L.length} losses came as ${col}.`);
+    }
+    // 3. current streak into this game
+    let streak = 0; const last = g[g.length - 1].result;
+    for (let i = g.length - 1; i >= 0 && g[i].result === last; i--) streak++;
+    if (streak >= 2 && last !== "d") lines.push(`You came in ${last === "l" ? "losing" : "winning"} ${streak} straight against them.`);
+    // 4. rating gap
+    const gaps = g.filter(x => x.my_elo && x.opp_elo).map(x => x.opp_elo - x.my_elo);
+    if (gaps.length >= 3) {
+      const avg = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length);
+      if (Math.abs(avg) >= 100) lines.push(`They've averaged ${Math.abs(avg)} rating points ${avg > 0 ? "above" : "below"} you across these games.`);
+    }
+    const days = new Set(g.map(x => new Date(x.end_time * 1000).toDateString()));
+    const chips = g.map(x => `<span class="h2h-chip ${x.result}" title="${x.color}, ${x.termination}${x.accuracy != null ? `, chess.com accuracy ${x.accuracy}%` : ""}">${x.result.toUpperCase()}</span>`).join("") +
+      `<span class="h2h-chip ${resCode} now" title="this game">${resCode.toUpperCase()}</span>`;
+    el.innerHTML = `
+      <div class="h2h-top">
+        <span class="h2h-title">vs. ${oppName} &mdash; ${H2H.n} prior game${H2H.n === 1 ? "" : "s"}</span>
+        <span class="h2h-record tabular"><span class="w">${H2H.w}</span>-<span class="l">${H2H.l}</span>-<span class="d">${H2H.d}</span></span>
+      </div>
+      <div class="h2h-chips" aria-label="Results against this opponent, oldest first">${chips}</div>
+      ${lines.length ? `<ul>${lines.slice(0, 3).map(l => `<li>${l}</li>`).join("")}</ul>` : ""}
+      <p class="fine">before this game &middot; with it: ${now.w}-${now.l}-${now.d}${days.size === 1 ? " &middot; all prior games were played on one day" : ""} &middot; oldest to newest, outlined chip is this game</p>`;
+    el.hidden = false;
+  })();
+
+  // ---- move-quality mix (added 2026-09-24): every move as one stacked
+  // bar, same groups and colors as the chart's legend, ordered best to worst.
+  // Book moves get a segment (they're real moves) but stay neutral. Two rows,
+  // yours and the opponent's, on the same scale for contrast.
+  (function renderMix() {
+    const groups = [...LEGEND_GROUPS].reverse();
+    const order = ["Brilliant / Great Find", "Excellent / Good / Best", "Book", "Inaccuracy", "Mistake", "Blunder / Miss"];
+    groups.sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
+    const rowFor = (list, label) => {
+      const total = list.length || 1;
+      const segs = groups.map(gr => ({ gr, n: list.filter(a => gr.tags.includes(a.tag)).length })).filter(x => x.n);
+      return { label, segs, total, html: `<div class="mix-row"><span class="mix-label">${label}</span><div class="mix-bar" role="img" aria-label="${segs.map(x => `${x.n} ${x.gr.label}`).join(", ")}">${segs.map(x => `<div class="mix-seg" style="width:${(x.n / total * 100).toFixed(2)}%;background:${x.gr.color}" title="${x.gr.label}: ${x.n} of ${list.length} (${Math.round(x.n / total * 100)}%)">${x.n / total >= 0.06 ? x.n : ""}</div>`).join("")}</div></div>` };
+    };
+    const youRow = rowFor(mine, "you");
+    const oppRow = rowFor(ann.filter(a => !a.is_me), "opponent");
+    const used = groups.filter(gr => [...mine, ...ann.filter(a => !a.is_me)].some(a => gr.tags.includes(a.tag)));
+    document.getElementById("mix").innerHTML = youRow.html + oppRow.html +
+      `<div class="mix-legend">${used.map(gr => `<span class="item"><span class="swatch" style="background:${gr.color}"></span>${gr.label}</span>`).join("")}</div>`;
+  })();
+
+  // ---- board replay viewer: pure rendering, no chess logic needed client-side
+  // (review.py already resolved castling/en passant/promotion into each ply's
+  // FEN, and into the played/best move's UCI squares) ----
+  const PIECE_GLYPH = { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚" };
+  const BOARD_S = 52; // px per square, viewBox units
+  // Shared FEN board parsing, used by the board itself and by captured-piece
+  // tracking below — grid[r][f], r=0 is rank 8 (FEN's own row order).
+  function fenGrid(fen) {
+    return fen.split(" ")[0].split("/").map(rowStr => {
+      const row = [];
+      for (const ch of rowStr) { if (/\d/.test(ch)) { for (let k = 0; k < +ch; k++) row.push(null); } else row.push(ch); }
+      return row;
+    });
+  }
+  function pieceAtSquare(fen, sq) {
+    const file = sq.charCodeAt(0) - 97, rank = parseInt(sq[1], 10);
+    return fenGrid(fen)[8 - rank][file];
+  }
+  function squareCenter(sq, flip) {
+    const file = sq.charCodeAt(0) - 97, rank = parseInt(sq[1], 10) - 1;
+    const dispF = flip ? 7 - file : file, dispR = flip ? rank : 7 - rank;
+    return [dispF * BOARD_S + BOARD_S / 2, dispR * BOARD_S + BOARD_S / 2];
+  }
+  function arrowSVG(fx, fy, tx, ty, color, dashed) {
+    const dx = tx - fx, dy = ty - fy, len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len, shrink = BOARD_S * 0.3;
+    const ex = tx - ux * shrink, ey = ty - uy * shrink;
+    const angle = Math.atan2(dy, dx), headLen = 13, headW = 9;
+    const hx1 = ex - headLen * Math.cos(angle) + headW * Math.sin(angle), hy1 = ey - headLen * Math.sin(angle) - headW * Math.cos(angle);
+    const hx2 = ex - headLen * Math.cos(angle) - headW * Math.sin(angle), hy2 = ey - headLen * Math.sin(angle) + headW * Math.cos(angle);
+    return `<line x1="${fx.toFixed(1)}" y1="${fy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="${color}" stroke-width="6" stroke-linecap="round" opacity="0.85" ${dashed ? 'stroke-dasharray="10,7"' : ""}/>
+      <polygon points="${ex.toFixed(1)},${ey.toFixed(1)} ${hx1.toFixed(1)},${hy1.toFixed(1)} ${hx2.toFixed(1)},${hy2.toFixed(1)}" fill="${color}" opacity="0.85"/>`;
+  }
+  function renderBoardSVG(fen, orientation, arrows) {
+    const grid = fenGrid(fen);
+    const flip = orientation === "black", B = BOARD_S * 8;
+    let svg = `<svg class="board-svg" viewBox="0 0 ${B} ${B}" role="img" aria-label="Board position">`;
+    // Coordinate labels (added 2026-09-17, chess.com-style): rank
+    // numbers inset top-left of the visually-leftmost column, file letters
+    // inset bottom-right of the visually-bottom row. `r`/`f` are the FEN's
+    // own indices (rank = 8-r, file = a+f) regardless of orientation — only
+    // `dispR`/`dispF` (already flip-aware) decide which squares are the
+    // edge ones, so the labels come out correct in both orientations without
+    // any separate flip-specific logic.
+    for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++) {
+      const dispR = flip ? 7 - r : r, dispF = flip ? 7 - f : f, light = (r + f) % 2 === 0;
+      svg += `<rect x="${dispF * BOARD_S}" y="${dispR * BOARD_S}" width="${BOARD_S}" height="${BOARD_S}" fill="${light ? "var(--board-light)" : "var(--board-dark)"}"/>`;
+      // Coordinate labels always plain white (2026-09-17) — both
+      // square shades are dark amber-brown in this theme, so one fixed light color
+      // reads fine on either, unlike chess.com's own light/dark squares.
+      if (dispF === 0) {
+        svg += `<text x="${dispF * BOARD_S + BOARD_S * 0.09}" y="${dispR * BOARD_S + BOARD_S * 0.24}" font-size="${BOARD_S * 0.19}" font-weight="700" fill="#fff" font-family="var(--font-mono)">${8 - r}</text>`;
+      }
+      if (dispR === 7) {
+        svg += `<text x="${dispF * BOARD_S + BOARD_S * 0.91}" y="${dispR * BOARD_S + BOARD_S * 0.91}" text-anchor="end" font-size="${BOARD_S * 0.19}" font-weight="700" fill="#fff" font-family="var(--font-mono)">${String.fromCharCode(97 + f)}</text>`;
+      }
+    }
+    for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++) {
+      const ch = grid[r][f]; if (!ch) continue;
+      const dispR = flip ? 7 - r : r, dispF = flip ? 7 - f : f;
+      const isWhite = ch === ch.toUpperCase();
+      svg += `<text x="${dispF * BOARD_S + BOARD_S / 2}" y="${dispR * BOARD_S + BOARD_S / 2}" text-anchor="middle" dominant-baseline="central"
+        font-size="${BOARD_S * 0.74}" fill="${isWhite ? "var(--board-piece-white)" : "var(--board-piece-black)"}"
+        stroke="${isWhite ? "var(--board-piece-white-stroke)" : "var(--board-piece-black-stroke)"}" stroke-width="${isWhite ? 1.5 : 1}" paint-order="stroke fill">${PIECE_GLYPH[ch.toLowerCase()]}</text>`;
+    }
+    arrows.forEach(a => {
+      const [fx, fy] = squareCenter(a.uci.slice(0, 2), flip), [tx, ty] = squareCenter(a.uci.slice(2, 4), flip);
+      svg += arrowSVG(fx, fy, tx, ty, a.color, a.dashed);
+    });
+    return svg + "</svg>";
+  }
+
+  function card(a, rank, kind) {
+    const s = swing(a);
+    const stat = kind === "worst"
+      ? `win% <b>${a.wp_before}</b> &rarr; <b>${a.wp_after}</b> · swing <b>&minus;${s.toFixed(1)}</b> · cpl ${a.cpl}`
+      : `win% <b>${a.wp_before}</b> · gap to 2nd-best <b>${a.gap_to_second_best}</b> cp`;
+    const alt = a.best_san ? `<span class="arrow">&rarr; better:</span><span class="best">${a.best_san}</span>` : "";
+    return `<div class="move" id="${kind}-${a.ply}">
+      <div class="mv-meta"><span class="rank">${rank}</span>move ${mvNum(a)}<br><span class="tag ${tagCls(a.tag)}">${a.tag}</span></div>
+      <div><div class="mv-line"><span class="san ${kind === "worst" ? "bad" : "good"}">${mvNum(a)} ${a.san}</span>${alt}</div>
+        <div class="mv-stat">${stat} &middot; <a class="view-board-link" data-view-ply="${a.ply}">view on board</a></div>
+        ${note(a) ? `<div class="mv-why">${note(a)}</div>` : ""}</div>
+    </div>`;
+  }
+  // ---- missed moves: tactical motifs from REVIEW.motifs (added 2026-09-17,
+  //; see find_motifs()/compute_motifs() in review.py for what's
+  // detected and its known heuristic limitations). Purely descriptive — no
+  // narrative note, the motif badge is the content. ----
+  {
+    const motifCard = (m) => {
+      const a = ann[m.ply];
+      const badges = m.motifs.map(t => `<span class="tag motif">${t}</span>`).join("");
+      return `<div class="move">
+        <div class="mv-meta">move ${mvNum(a)}<br><span class="tag ${tagCls(a.tag)}">${a.tag}</span></div>
+        <div><div class="mv-line"><span class="san">${mvNum(a)} ${m.san}</span>${badges}</div>
+          <div class="mv-stat"><a class="view-board-link" data-view-ply="${m.ply}">view on board</a></div></div>
+      </div>`;
+    };
+    const motifData = REVIEW.motifs || { missed: [], opponent: [] };
+    document.getElementById("missedMovesYou").innerHTML = motifData.missed.length
+      ? motifData.missed.map(motifCard).join("")
+      : `<div class="empty">no missed forks, pins, or discovered attacks/checks detected</div>`;
+    document.getElementById("missedMovesOpp").innerHTML = motifData.opponent.length
+      ? motifData.opponent.map(motifCard).join("")
+      : `<div class="empty">opponent didn't land a detected motif with a good move</div>`;
+  }
+
+  document.getElementById("worstMoves").innerHTML = worst.map((a, i) => card(a, i + 1, "worst")).join("") || `<div class="empty">no moves lost win probability</div>`;
+  document.getElementById("bestMoves").innerHTML = best.length
+    ? best.map((a, i) => card(a, i + 1, "best")).join("") + (best.length < 3 ? `<div class="empty">only ${best.length} move${best.length === 1 ? "" : "s"} qualified (Brilliant / Great Find / Excellent / Best) — not padded</div>` : "")
+    : `<div class="empty">no Brilliant, Great Find, Excellent, or Best moves this game</div>`;
+
+  const sanCls = (t) => flaggedTags.has(t) ? "bad" : greatTags.has(t) ? "good" : "";
+
+  // ---- compact move list (White | Black per row), built once. Replaces the
+  // old scrolling "Every move, in order" card list (retired 2026-09-16, per
+  // the user) — every move still shows here, just as a compact index; the full
+  // explanation for whichever move is selected lives in the speech bubble
+  // above it instead of in a card of its own. Capture icons (added
+  // 2026-09-17, chess.com-style) reuse capturedPieceAt/
+  // pieceIconSVG from the material tray below — function declarations are
+  // hoisted, so calling them here before their own textual definition is
+  // fine. ----
+  {
+    const rows = [];
+    for (let i = 0; i < ann.length; i += 2) {
+      const w = ann[i], b = i + 1 < ann.length ? ann[i + 1] : null;
+      const cell = (a) => {
+        if (!a) return `<span class="mlc-cell empty"></span>`;
+        const captured = capturedPieceAt(a.ply);
+        const capIcon = captured ? `<span class="mlc-cap-icon">${pieceIconSVG(captured.toLowerCase(), captured === captured.toUpperCase(), 15)}</span>` : "";
+        return `<span class="mlc-cell ${sanCls(a.tag)}" data-ply="${a.ply}"><span class="mlc-dot" style="background:${TAG_RING_COLOR[a.tag] || "var(--muted)"}"></span>${a.san}${capIcon}</span>`;
+      };
+      rows.push(`<div class="mlc-row"><span class="mlc-num">${w.fullmove}.</span>${cell(w)}${cell(b)}</div>`);
+    }
+    document.getElementById("moveListCompact").innerHTML = rows.join("");
+    document.getElementById("moveListCompact").addEventListener("click", (e) => {
+      const c = e.target.closest(".mlc-cell:not(.empty)");
+      if (c) setReplayPly(parseInt(c.dataset.ply, 10));
+    });
+  }
+
+  // ---- win-probability chart (my perspective after every half-move) ----
+  // Rings every one of my moves — solid fill for the ones detailed in the
+  // worst/best lists below, open ring for the rest, colored by tag so the
+  // shape of a messy game reads at a glance instead of only its two extremes.
+  const presentTags = new Set(mine.map(a => a.tag));
+  document.getElementById("wpLegend").innerHTML = [`<div class="item"><span class="swatch" style="background:var(--series-mine)"></span>Your win %</div>`]
+    .concat(LEGEND_GROUPS.filter(g => g.tags.some(t => presentTags.has(t)))
+      .map(g => `<div class="item"><span class="ring" style="border-color:${g.color}"></span>${g.label}</div>`))
+    .join("");
+
+  const series = ann.map(a => ({ a, wp: a.is_me ? a.wp_after : 100 - a.wp_after }));
+  const wrap = document.getElementById("wpChartWrap");
+  const W = 820, Hh = 260, padL = 40, padR = 16, padT = 14, padB = 30;
+  const plotW = W - padL - padR, plotH = Hh - padT - padB, n = series.length;
+  const x = i => n === 1 ? padL : padL + plotW * i / (n - 1);
+  const y = v => padT + plotH - (v / 100) * plotH;
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Win probability across ${n} half-moves, every flagged move marked">`;
+  // Phase bands — a faint background strip behind the plot, not a new color
+  // scheme: reuses the existing surface shades already used for depth
+  // elsewhere on the page, so it reads as background context rather than a
+  // fourth categorical series competing with the tag-colored rings.
+  const PHASE_FILL = { opening: null, middlegame: "var(--surface)", endgame: "var(--surface-2)" };
+  const step = n > 1 ? plotW / (n - 1) : plotW;
+  const bandEdges = [];
+  for (let i = 1, runStart = 0; i <= n; i++) {
+    if (i === n || ann[i].phase !== ann[runStart].phase) {
+      const xStart = runStart === 0 ? padL : x(runStart) - step / 2;
+      const xEnd = i === n ? (W - padR) : x(i) - step / 2;
+      bandEdges.push({ phase: ann[runStart].phase, xStart, xEnd });
+      runStart = i;
+    }
+  }
+  bandEdges.forEach(b => {
+    if (!PHASE_FILL[b.phase]) return;
+    svg += `<rect x="${b.xStart.toFixed(1)}" y="${padT}" width="${(b.xEnd - b.xStart).toFixed(1)}" height="${plotH}" fill="${PHASE_FILL[b.phase]}"/>`;
+  });
+  [0, 25, 50, 75, 100].forEach(v => {
+    svg += `<line x1="${padL}" x2="${W - padR}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 50 ? "var(--chart-axis)" : "var(--chart-grid)"}" stroke-width="1" ${v === 50 ? 'stroke-dasharray="4,4"' : ""}/>`;
+    svg += `<text x="${padL - 8}" y="${y(v) + 4}" text-anchor="end" font-family="var(--font-mono)" font-size="10.5" fill="var(--chart-muted)">${v}%</text>`;
+  });
+  svg += `<path d="${series.map((p, i) => `${i ? "L" : "M"} ${x(i).toFixed(1)} ${y(p.wp).toFixed(1)}`).join(" ")}" fill="none" stroke="var(--series-mine)" stroke-width="2"/>`;
+  series.forEach((p, i) => {
+    const a = p.a;
+    const color = a.is_me ? TAG_RING_COLOR[a.tag] : null;
+    if (!color) return;
+    const detailed = worstPlies.has(a.ply) || bestPlies.has(a.ply);
+    svg += detailed
+      ? `<circle cx="${x(i)}" cy="${y(p.wp)}" r="6" fill="${color}" stroke="var(--paper)" stroke-width="1.5"/>`
+      : `<circle cx="${x(i)}" cy="${y(p.wp)}" r="5" fill="none" stroke="${color}" stroke-width="1.8" opacity="0.85"/>`;
+  });
+  svg += `<text x="${x(0)}" y="${Hh - 8}" font-family="var(--font-mono)" font-size="10.5" fill="var(--chart-muted)">move 1</text>`;
+  svg += `<text x="${x(n - 1)}" y="${Hh - 8}" text-anchor="end" font-family="var(--font-mono)" font-size="10.5" fill="var(--chart-muted)">move ${ann[n - 1].fullmove}</text>`;
+  bandEdges.forEach(b => {
+    const midX = (b.xStart + b.xEnd) / 2;
+    svg += `<text x="${midX.toFixed(1)}" y="${(padT + plotH + 14).toFixed(1)}" text-anchor="middle" font-family="var(--font-mono)" font-size="9.5" fill="var(--chart-muted)" opacity="0.75">${b.phase}</text>`;
+  });
+  svg += `<line id="replayCursor" x1="${x(0)}" x2="${x(0)}" y1="${padT}" y2="${padT + plotH}" stroke="var(--chrome)" stroke-width="1.5" opacity="0.55"/>`;
+  svg += `<rect id="hoverRect" x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor:pointer"/>`;
+  svg += `<line id="crosshair" x1="0" x2="0" y1="${padT}" y2="${padT + plotH}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2,3" opacity="0"/>`;
+  svg += `<circle id="hoverPt" r="5" fill="var(--series-mine)" opacity="0"/>`;
+  svg += `</svg><div class="tooltip" id="wpTooltip"></div>`;
+  wrap.innerHTML = svg;
+  const svgEl = wrap.querySelector("svg"), hoverRect = wrap.querySelector("#hoverRect"), crosshair = wrap.querySelector("#crosshair"), hoverPt = wrap.querySelector("#hoverPt"), tooltip = wrap.querySelector("#wpTooltip"), replayCursor = wrap.querySelector("#replayCursor");
+  function pointerLoc(evt) { const pt = svgEl.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY; return pt.matrixTransform(svgEl.getScreenCTM().inverse()); }
+  function idxFor(loc) { return Math.max(0, Math.min(n - 1, Math.round((loc.x - padL) / plotW * (n - 1)))); }
+  // Every point does the same thing on click now — jumps the board replay
+  // viewer to that ply (2026-09-18) — so the cursor is always
+  // "pointer" and the tooltip always names that destination, with no more
+  // ring-proximity gating for a second, different click behavior.
+  function show(evt) {
+    const loc = pointerLoc(evt), i = idxFor(loc), p = series[i], a = p.a;
+    crosshair.setAttribute("x1", x(i)); crosshair.setAttribute("x2", x(i)); crosshair.setAttribute("opacity", 1);
+    hoverPt.setAttribute("cx", x(i)); hoverPt.setAttribute("cy", y(p.wp)); hoverPt.setAttribute("opacity", 1);
+    const rb = wrap.getBoundingClientRect(), sb = svgEl.getBoundingClientRect();
+    tooltip.style.left = (sb.left - rb.left + x(i) * sb.width / W) + "px";
+    tooltip.style.top = (sb.top - rb.top + y(p.wp) * sb.height / Hh) + "px";
+    tooltip.innerHTML = `<div class="tt-head">${mvNum(a)} ${a.san} · ${a.is_me ? "you" : "opponent"} · ${a.tag}</div>
+      <div class="tt-row"><span>your win% after</span><span>${p.wp.toFixed(1)}</span></div>
+      ${a.best_san ? `<div class="tt-row"><span>better</span><span>${a.best_san}</span></div>` : ""}
+      <div class="tt-hint">click to view on the board &uarr;</div>`;
+    tooltip.classList.add("show");
+  }
+  function hide() { crosshair.setAttribute("opacity", 0); hoverPt.setAttribute("opacity", 0); tooltip.classList.remove("show"); }
+  function click(evt) {
+    const loc = pointerLoc(evt), i = idxFor(loc), p = series[i], a = p.a;
+    setReplayPly(a.ply, { scroll: true });
+  }
+  hoverRect.addEventListener("mousemove", show); hoverRect.addEventListener("mouseleave", hide);
+  hoverRect.addEventListener("touchmove", (e) => show(e.touches[0]), { passive: true });
+  hoverRect.addEventListener("click", click);
+
+  // ---- board replay viewer: fens has n+1 entries (index p = position before
+  // ann[p] is played, p===n = final position). Every ply is reachable, not
+  // just flagged ones, since fens carries the whole game. The speech bubble
+  // (2026-09-16, replacing the old "Every move, in order" card
+  // list) shows whichever move is currently on the board — one at a time,
+  // same content each card used to carry, instead of a scrolling list. ----
+  const boardHolder = document.getElementById("boardHolder");
+  const speechBubble = document.getElementById("speechBubble");
+  let replayPly = 0;
+
+  // ---- clock badges above/below the board (2026-09-17) ----
+  // clockAtPly[p] = each side's clock as known right before ann[p] is played
+  // (i.e. whatever it was after that side's own last move) — a display
+  // value stays put until that side actually moves again, same as a real
+  // clock. No new data: `clock` was already recorded per ply for both
+  // colors for the time-pressure chart below, just never shown on the board.
+  const hasAnyClock = ann.some(a => a.clock != null);
+  const boardClockOppEl = document.getElementById("boardClockOpp");
+  const boardClockMeEl = document.getElementById("boardClockMe");
+  // Hide just the clock spans (not the whole row) when there's no clock data
+  // at all — the material badge below shares this row and has nothing to do
+  // with whether the PGN carried clock times.
+  if (!hasAnyClock) { boardClockOppEl.hidden = true; boardClockMeEl.hidden = true; }
+  const clockAtPly = [];
+  {
+    const startSeconds = H.TimeControl ? parseInt(H.TimeControl.split("+")[0], 10) : NaN;
+    const last = { white: Number.isFinite(startSeconds) ? startSeconds : null, black: Number.isFinite(startSeconds) ? startSeconds : null };
+    for (let p = 0; p <= n; p++) {
+      clockAtPly.push({ white: last.white, black: last.black });
+      if (p < n && ann[p].clock != null) last[ann[p].color] = ann[p].clock;
+    }
+  }
+  const clockLowThreshold = (() => {
+    const seen = ann.map(a => a.clock).filter(c => c != null);
+    const startSeconds = H.TimeControl ? parseInt(H.TimeControl.split("+")[0], 10) : NaN;
+    const maxClock = Number.isFinite(startSeconds) && startSeconds > 0 ? startSeconds : (seen.length ? Math.max(...seen) : 600);
+    return Math.max(10, maxClock * 0.1);
+  })();
+  function fmtClock(sec) {
+    if (sec == null) return "--:--";
+    sec = Math.max(0, Math.round(sec));
+    return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+  }
+  function renderBoardClocks(p) {
+    if (!hasAnyClock) return;
+    const c = clockAtPly[p];
+    const oppColor = me === "white" ? "black" : "white";
+    const oppSec = c[oppColor], meSec = c[me];
+    const oppEl = document.getElementById("boardClockOpp"), meEl = document.getElementById("boardClockMe");
+    oppEl.textContent = fmtClock(oppSec); oppEl.classList.toggle("low", oppSec != null && oppSec <= clockLowThreshold);
+    meEl.textContent = fmtClock(meSec); meEl.classList.toggle("low", meSec != null && meSec <= clockLowThreshold);
+  }
+  // ---- material badges above/below the board (2026-09-17) ----
+  // Chess.com-style: each row shows small icons of the opponent's pieces
+  // that side has actually captured (sorted high-to-low value), plus a
+  // plain "+N" at the end of whichever row is currently ahead on material —
+  // nothing shown for the trailing row, no icons or "+N" when level.
+  const PIECE_VALUE = { p: 1, n: 3, b: 3, r: 5, q: 9 };
+  function materialDiff(fen) {
+    let white = 0, black = 0;
+    for (const ch of fen.split(" ")[0]) {
+      const v = PIECE_VALUE[ch.toLowerCase()];
+      if (v == null) continue;
+      if (ch === ch.toLowerCase()) black += v; else white += v;
+    }
+    return white - black;
+  }
+  // Captured-piece icons need the actual capture log, not just a piece-count
+  // diff (a promotion changes the board's point total without capturing
+  // anything, so counting alone would misattribute it as a capture).
+  // capturedPieceAt(p): for a capturing move, the FEN letter of whatever sat
+  // on the destination square in that ply's own pre-move FEN — already
+  // available, no new data. En passant is the one case with nothing on the
+  // destination square itself; the captured pawn sits on the mover's
+  // destination file but the origin's rank. Shared by the material tray
+  // (cumulative per side) and the move-list capture icons (added
+  // 2026-09-17, one lookup per move) below.
+  const CAPTURE_VALUE_ORDER = ["q", "r", "b", "n", "p"];
+  function capturedPieceAt(p) {
+    const a = ann[p];
+    if (!a.san || !a.san.includes("x") || !a.uci) return null;
+    const fenBefore = REVIEW.fens[p], destSq = a.uci.slice(2, 4);
+    let captured = pieceAtSquare(fenBefore, destSq);
+    if (!captured) { // en passant: captured pawn isn't on the destination square
+      const originSq = a.uci.slice(0, 2);
+      captured = pieceAtSquare(fenBefore, destSq[0] + originSq[1]);
+    }
+    return captured;
+  }
+  const captureSnapshots = (() => {
+    const snaps = [{ white: [], black: [] }];
+    let curWhite = [], curBlack = [];
+    for (let p = 0; p < n; p++) {
+      const captured = capturedPieceAt(p);
+      if (captured) (ann[p].color === "white" ? curWhite : curBlack).push(captured.toLowerCase());
+      snaps.push({ white: [...curWhite], black: [...curBlack] });
+    }
+    return snaps;
+  })();
+  function pieceIconSVG(letter, isWhite, size) {
+    size = size || 26;
+    return `<svg class="cap-icon" viewBox="0 0 20 20" width="${size}" height="${size}" aria-hidden="true">
+      <text x="10" y="15.5" text-anchor="middle" font-size="20"
+        fill="${isWhite ? "var(--board-piece-white)" : "var(--board-piece-black)"}"
+        stroke="${isWhite ? "var(--board-piece-white-stroke)" : "var(--board-piece-black-stroke)"}"
+        stroke-width="${isWhite ? 1.1 : 0.7}" paint-order="stroke fill">${PIECE_GLYPH[letter]}</text></svg>`;
+  }
+  const boardMaterialOppEl = document.getElementById("boardMaterialOpp");
+  const boardMaterialMeEl = document.getElementById("boardMaterialMe");
+  function renderMaterialRow(el, capturedTypes, capturedColorIsWhite, plusAmount) {
+    // Never toggle `hidden` here (2026-09-17) — this row used to
+    // collapse to zero height until the first capture, then the board card
+    // (and the sidebar height synced to it) would jump the moment one
+    // landed. `.board-material`'s own `min-height` reserves the space up
+    // front instead, so the row is always there, just empty early on.
+    const sorted = [...capturedTypes].sort((x, y) => CAPTURE_VALUE_ORDER.indexOf(x) - CAPTURE_VALUE_ORDER.indexOf(y));
+    const icons = sorted.map(t => pieceIconSVG(t, capturedColorIsWhite)).join("");
+    const plus = plusAmount ? `<span class="mat-plus">+${plusAmount}</span>` : "";
+    el.innerHTML = icons + plus;
+  }
+  function renderBoardMaterial(p) {
+    const diff = materialDiff(REVIEW.fens[p]);
+    const snap = captureSnapshots[p];
+    const whiteEl = me === "white" ? boardMaterialMeEl : boardMaterialOppEl;
+    const blackEl = me === "white" ? boardMaterialOppEl : boardMaterialMeEl;
+    // White's row shows the black pieces White has captured, and vice versa.
+    renderMaterialRow(whiteEl, snap.white, false, diff > 0 ? diff : 0);
+    renderMaterialRow(blackEl, snap.black, true, diff < 0 ? -diff : 0);
+  }
+  function renderSpeechBubble(p) {
+    if (p >= n) {
+      speechBubble.innerHTML = `<div class="sb-empty"># final position — ${H.Termination || H.Result || "game over"}</div>`;
+      return;
+    }
+    const a = ann[p];
+    const alt = a.best_san ? `<span class="arrow">&rarr; better:</span><span class="best">${a.best_san}</span>` : "";
+    const wpLine = a.is_me ? ` &middot; win% <b>${a.wp_before}</b> &rarr; <b>${a.wp_after}</b>` : "";
+    speechBubble.innerHTML = `
+      <div class="sb-head"><span class="tag ${tagCls(a.tag)}">${a.tag}</span>${a.is_me ? "" : `<span class="tag opp">opponent</span>`}</div>
+      <div class="sb-move"><span class="san ${sanCls(a.tag)}">${mvNum(a)} ${a.san}</span>${alt}</div>
+      <div class="sb-stat">cpl ${a.cpl}${wpLine}</div>
+      ${a.is_me && note(a) ? `<div class="sb-why">${note(a)}</div>` : ""}`;
+  }
+  function renderReplay() {
+    const p = replayPly, fen = REVIEW.fens[p], arrows = [];
+    if (p < n) {
+      const a = ann[p];
+      if (a.uci) arrows.push({ uci: a.uci, color: a.is_me ? (TAG_RING_COLOR[a.tag] || "var(--ink)") : "var(--series-opp)" });
+      if (a.best_uci) arrows.push({ uci: a.best_uci, color: "var(--status-good-text)", dashed: true });
+    }
+    boardHolder.innerHTML = renderBoardSVG(fen, me, arrows);
+    renderSpeechBubble(p);
+    renderBoardClocks(p);
+    renderBoardMaterial(p);
+    syncPanelHeight();
+    const cursorX = x(Math.min(p, n - 1));
+    replayCursor.setAttribute("x1", cursorX); replayCursor.setAttribute("x2", cursorX);
+    document.querySelectorAll("#moveListCompact .mlc-cell.active").forEach(c => c.classList.remove("active"));
+    if (p < n) {
+      const cell = document.querySelector(`#moveListCompact .mlc-cell[data-ply="${p}"]`);
+      if (cell) { cell.classList.add("active"); cell.scrollIntoView({ block: "nearest" }); }
+    }
+  }
+  function setReplayPly(p, opts) {
+    replayPly = Math.max(0, Math.min(n, p));
+    renderReplay();
+    if (opts && opts.scroll) {
+      const section = boardHolder.closest("section");
+      if (section) {
+        // The Board widget can be toggled off via the widget-filters row —
+        // jumping to a position (chart click, "view on board" link) should
+        // still show it, so un-hide + re-sync its filter pill rather than
+        // scrolling into a display:none section.
+        if (section.hidden) {
+          section.hidden = false;
+          const btn = document.querySelector('.widget-filters button[data-widget="board"]');
+          if (btn) { btn.classList.add("active"); btn.setAttribute("aria-pressed", "true"); }
+        }
+        section.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      }
+    }
+  }
+  document.getElementById("replayPrev").addEventListener("click", () => setReplayPly(replayPly - 1));
+  document.getElementById("replayNext").addEventListener("click", () => setReplayPly(replayPly + 1));
+  // Copy FEN (added 2026-09-24): the position currently on the board, from
+  // the same REVIEW.fens the board renders. execCommand runs synchronously
+  // inside the click, which is the path that works in an embedded page; the
+  // async Clipboard API is the fallback (raced against a timeout, since it
+  // can hang instead of rejecting when permission is undecided). If both
+  // fail, the FEN goes into the button label so it can be selected by hand.
+  const copyBtn = document.getElementById("copyFen");
+  let copyTimer = null;
+  copyBtn.addEventListener("click", async () => {
+    const fen = REVIEW.fens[replayPly];
+    let ok = false;
+    try {
+      const t = document.createElement("textarea"); t.value = fen; t.setAttribute("readonly", "");
+      t.style.position = "fixed"; t.style.opacity = "0";
+      document.body.appendChild(t); t.select(); ok = document.execCommand("copy"); t.remove();
+    } catch (e) { ok = false; }
+    if (!ok) {
+      try { await Promise.race([navigator.clipboard.writeText(fen), new Promise((_, rej) => setTimeout(rej, 1000))]); ok = true; } catch (e) { ok = false; }
+    }
+    copyBtn.textContent = ok ? "copied \u2713" : fen;
+    clearTimeout(copyTimer);
+    copyTimer = setTimeout(() => { copyBtn.textContent = "copy FEN"; }, ok ? 1500 : 6000);
+  });
+  // Left/right arrow keys step the board globally — the only way to move
+  // multiple plies at once now that the slider is gone (2026-09-16, the user).
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); setReplayPly(replayPly - 1); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); setReplayPly(replayPly + 1); }
+  });
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest(".view-board-link");
+    if (link) setReplayPly(parseInt(link.dataset.viewPly, 10), { scroll: true });
+  });
+  setReplayPly(0);
+  window.addEventListener("resize", syncPanelHeight);
+
+  // Belt-and-suspenders on top of the CSS fix above: measure the board's
+  // actual rendered height and cap the move list to fit under the speech
+  // bubble within it, so the sidebar's bottom edge tracks the board's bottom
+  // edge exactly, not the CSS grid's own auto-sizing behavior (which can
+  // vary by browser). Called from renderReplay() on every step (2026-09-16,
+  // fixed) — a longer note grows the bubble, which must shrink
+  // the list by exactly that much, not just on first load; no floor on the
+  // result either, so a very tall note can legitimately leave few or no
+  // rows visible rather than holding a fixed minimum row count. Skipped
+  // below the 720px breakpoint, where the columns stack and there's no
+  // board height to match against.
+  function syncPanelHeight() {
+    const list = document.getElementById("moveListCompact");
+    if (window.matchMedia("(max-width: 720px)").matches) { list.style.maxHeight = ""; return; }
+    const boardCard = document.querySelector(".board-card");
+    if (!boardCard) return;
+    const bubbleBox = speechBubble.getBoundingClientRect();
+    const bubbleMarginBottom = parseFloat(getComputedStyle(speechBubble).marginBottom) || 0;
+    const available = boardCard.getBoundingClientRect().height - bubbleBox.height - bubbleMarginBottom;
+    list.style.maxHeight = Math.max(0, Math.round(available)) + "px";
+  }
+
+  // ---- time-pressure overlay: both players' clocks across the game, same x
+  // mapping as the chart above, so a dip lines up visually under whatever
+  // happened at that point above. Clock comes straight from the PGN's own
+  // %clk comments — no extra engine work, added 2026-09-16: the opponent's
+  // clock uses the same field, just for their own plies (is_me false)
+  // instead of filtered out. The whole chart stays hidden if this game's
+  // PGN didn't carry clock data at all (correspondence games, some imports). ----
+  {
+    const clockPts = series.map((p, i) => ({ i, a: p.a })).filter(o => o.a.is_me && o.a.clock != null);
+    const oppClockPts = series.map((p, i) => ({ i, a: p.a })).filter(o => !o.a.is_me && o.a.clock != null);
+    if (clockPts.length >= 2 || oppClockPts.length >= 2) {
+      document.getElementById("clockChartTitle").hidden = false;
+      const startSeconds = H.TimeControl ? parseInt(H.TimeControl.split("+")[0], 10) : NaN;
+      const seenClocks = clockPts.concat(oppClockPts).map(o => o.a.clock);
+      const maxClock = Number.isFinite(startSeconds) && startSeconds > 0 ? startSeconds : Math.max(...seenClocks);
+      const lowThreshold = Math.max(10, maxClock * 0.1);
+      const Hc = 90, padTc = 10, padBc = 4, plotHc = Hc - padTc - padBc;
+      const yc = (v) => padTc + plotHc - Math.max(0, Math.min(1, v / maxClock)) * plotHc;
+      let csvg = `<svg class="chart" viewBox="0 0 ${W} ${Hc}" role="img" aria-label="Remaining clock time for both players across the game">`;
+      csvg += `<rect x="${padL}" y="${yc(lowThreshold).toFixed(1)}" width="${plotW}" height="${(padTc + plotHc - yc(lowThreshold)).toFixed(1)}" fill="var(--status-critical)" opacity="0.08"/>`;
+      csvg += `<line x1="${padL}" x2="${W - padR}" y1="${yc(lowThreshold).toFixed(1)}" y2="${yc(lowThreshold).toFixed(1)}" stroke="var(--status-critical)" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>`;
+      if (oppClockPts.length >= 2) {
+        csvg += `<path d="${oppClockPts.map((o, k) => `${k ? "L" : "M"} ${x(o.i).toFixed(1)} ${yc(o.a.clock).toFixed(1)}`).join(" ")}" fill="none" stroke="var(--series-opp)" stroke-width="1.6" opacity="0.8"/>`;
+      }
+      if (clockPts.length >= 2) {
+        csvg += `<path d="${clockPts.map((o, k) => `${k ? "L" : "M"} ${x(o.i).toFixed(1)} ${yc(o.a.clock).toFixed(1)}`).join(" ")}" fill="none" stroke="var(--series-mine)" stroke-width="1.6" opacity="0.9"/>`;
+        clockPts.forEach(o => {
+          const color = TAG_RING_COLOR[o.a.tag];
+          if (color) csvg += `<circle cx="${x(o.i).toFixed(1)}" cy="${yc(o.a.clock).toFixed(1)}" r="3" fill="${color}"/>`;
+        });
+      }
+      csvg += `<text x="${padL - 8}" y="${(yc(maxClock) + 4).toFixed(1)}" text-anchor="end" font-family="var(--font-mono)" font-size="9.5" fill="var(--chart-muted)">${Math.round(maxClock)}s</text>`;
+      csvg += `<text x="${padL - 8}" y="${(yc(0) + 4).toFixed(1)}" text-anchor="end" font-family="var(--font-mono)" font-size="9.5" fill="var(--chart-muted)">0s</text>`;
+      csvg += `</svg>`;
+      document.getElementById("clockChartWrap").innerHTML = csvg;
+      if (clockPts.length >= 2 && oppClockPts.length >= 2) {
+        document.getElementById("clockChartTitle").innerHTML =
+          `Time remaining &mdash; shaded band marks low time &middot; <span style="color:var(--series-mine)">&#9644;</span> you &middot; <span style="color:var(--series-opp)">&#9644;</span> opponent`;
+      }
+    }
+  }
+
+  document.getElementById("generated").textContent = `generated ${GENERATED}`;
+})();
+
+// ---- widget filters (added 2026-09-18; replaces the earlier
+// per-section click-to-collapse header) ----
+(function () {
+  document.querySelectorAll(".widget-filters button[data-widget]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const section = document.querySelector(`section[data-widget="${btn.dataset.widget}"]`);
+      if (!section) return;
+      section.hidden = !section.hidden;
+      btn.classList.toggle("active", !section.hidden);
+      btn.setAttribute("aria-pressed", String(!section.hidden));
+    });
+  });
+})();
+
+</script>

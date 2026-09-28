@@ -1,0 +1,1675 @@
+<title>Blunder Bait</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@500;600;700&family=Inconsolata:wght@400;500;700&display=swap">
+<style>
+  /* Sparring-partner tool, sibling of the review.py / blunder-ledger
+     family — reuses that family's "midnight" palette and type pairing on purpose,
+     single fixed dark theme (same precedent as game-review-template.html). */
+  :root {
+    color-scheme: dark;
+    --paper:#0a0d16; --surface:#10141f; --surface-2:#171c2a;
+    --ink:#dfe4f2; --ink-soft:#a9b3cc; --muted:#5e6880; --line:#1f2740;
+    --accent:#d9c27a; --accent-soft:#f0dc9a;
+    --status-good:#3fcf72; --status-critical:#ff5a66; --status-info:#4dd0e8;
+    --board-light:#3a3226; --board-dark:#1f1a14; --board-hl:#ffb84a;
+    --board-piece-white:#ffe9c2; --board-piece-white-stroke:#1a140c;
+    --board-piece-black:#150f08; --board-piece-black-stroke:#ffc766;
+    --font-display:"Source Code Pro",ui-monospace,monospace;
+    --font-body:"Inconsolata",ui-monospace,monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--paper); }
+  body { color: var(--ink); font-family: var(--font-body); font-size: 14.5px; line-height: 1.55; }
+  .page { max-width: 980px; margin: 0 auto; padding: 30px 20px 60px; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; text-wrap: balance; }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  .masthead { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px dashed var(--line); }
+  .eyebrow { font-family: var(--font-body); font-size: 12.5px; color: var(--muted); margin: 0 0 8px; letter-spacing: 0.02em; }
+  .eyebrow::before { content: "aetrone@chess.com:~/spar$ "; color: var(--accent); }
+  .title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .masthead h1 { font-size: 32px; text-transform: uppercase; letter-spacing: 0.02em; color: var(--ink); }
+  .masthead .sub { color: var(--ink-soft); font-size: 14px; margin-top: 6px; max-width: 56ch; }
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 340px; }
+  .badge { font-family: var(--font-body); font-size: 11.5px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink-soft); white-space: nowrap; }
+  .badge b { color: var(--status-info); }
+  .badge.warn { border-color: var(--status-info); color: var(--status-info); white-space: normal; }
+
+  button.btn.ghost { background: transparent; padding: 11px 22px; font-size: 16px; border-width: 1.5px; border-color: var(--accent); color: var(--accent-soft); }
+  button.btn.ghost:hover { background: var(--surface-2); border-color: var(--accent-soft); }
+
+  [hidden] { display: none !important; }
+  .layout { display: flex; gap: 26px; margin-top: 26px; align-items: flex-start; flex-wrap: wrap; }
+  .board-col { flex: 1 1 460px; min-width: 300px; max-width: 520px; }
+  .side-col { flex: 1 1 280px; min-width: 260px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* --- opponent rating widget --- */
+  .rating-widget { margin-bottom: 14px; }
+  .rating-widget select { width: 100%; font-family: var(--font-body); font-size: 13px; font-weight: 600; padding: 8px 10px; border-radius: 3px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+  .rating-widget select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* --- review mode --- */
+  .review-empty { color: var(--ink-soft); font-size: 13.5px; padding: 10px 0; }
+  .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .pill { font-family: var(--font-body); font-size: 11.5px; padding: 4px 10px; border-radius: 12px; border: 1px solid var(--line); color: var(--ink-soft); cursor: pointer; background: transparent; }
+  .pill.active { border-color: var(--accent); color: var(--accent-soft); }
+  .feedback-banner { margin-top: 10px; padding: 10px 12px; border-radius: 4px; font-family: var(--font-display); font-weight: 600; font-size: 13.5px; border: 1px solid var(--line); }
+  .feedback-banner.correct { background: color-mix(in srgb, var(--status-good) 14%, var(--surface)); border-color: var(--status-good); color: var(--status-good); }
+  .feedback-banner.incorrect { background: color-mix(in srgb, var(--status-critical) 14%, var(--surface)); border-color: var(--status-critical); color: var(--status-critical); }
+  .feedback-banner .detail { display: block; margin-top: 4px; font-family: var(--font-body); font-weight: 400; color: var(--ink-soft); font-size: 12.5px; }
+  .feedback-banner .why { display: block; margin-top: 8px; font-family: var(--font-body); font-weight: 400; color: var(--ink); font-size: 12.5px; }
+  .feedback-banner .why ul { margin: 4px 0 0; padding-left: 18px; }
+  .feedback-banner .why .tag { font-family: var(--font-display); font-size: 11px; padding: 1px 6px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink-soft); }
+  .feedback-banner .fb-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .puzzle-meta { font-family: var(--font-body); font-size: 12.5px; color: var(--ink-soft); line-height: 1.6; }
+  .puzzle-meta a { color: var(--status-info); }
+  .nav-row { display: flex; gap: 8px; }
+  .nav-row .btn { flex: 1; }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; }
+  .panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
+
+  /* --- board --- */
+  .board-wrap { position: relative; }
+  .board-bar { display: flex; justify-content: space-between; align-items: center; padding: 6px 2px; font-family: var(--font-body); font-size: 13px; color: var(--ink-soft); }
+  .board-bar .name { color: var(--ink); font-weight: 600; }
+  .board-bar .mat { color: var(--status-good); margin-left: 8px; font-size: 12px; }
+  .board-svg { width: 100%; height: auto; display: block; border-radius: 3px; overflow: hidden; box-shadow: 0 0 0 1px var(--line); background: var(--board-dark); }
+  .sq { cursor: default; }
+  .sq.clickable { cursor: pointer; }
+  .sq-piece { font-size: 34px; pointer-events: none; }
+  .status-line { margin-top: 10px; font-family: var(--font-body); font-size: 13.5px; color: var(--ink-soft); min-height: 20px; display: flex; align-items: center; gap: 8px; }
+  .status-line .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--status-good); flex-shrink: 0; }
+  .status-line.thinking .dot { background: var(--status-info); animation: pulse 1s ease-in-out infinite; }
+  .status-line.danger .dot { background: var(--status-critical); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .status-line.thinking .dot { animation: none; } }
+
+  /* --- setup screen --- */
+  .setup-card { position: absolute; inset: 0; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; border-radius: 3px; padding: 16px; }
+  .setup-inner { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 22px 24px; max-width: 320px; text-align: center; }
+  .setup-inner p { color: var(--ink-soft); font-size: 13.5px; margin: 0 0 16px; }
+  .color-btns { display: flex; gap: 10px; justify-content: center; }
+
+  button.btn { font-family: var(--font-body); font-weight: 700; font-size: 13px; letter-spacing: 0.02em; padding: 9px 16px; border-radius: 3px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+  button.btn:hover { border-color: var(--accent); color: var(--accent-soft); }
+  button.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.btn.primary { background: var(--accent); color: #1a1608; border-color: var(--accent); }
+  button.btn.primary:hover { background: var(--accent-soft); color: #1a1608; }
+  button.btn.full { width: 100%; margin-top: 12px; }
+
+  /* --- move list --- */
+  .movelist { max-height: 260px; overflow-y: auto; font-family: var(--font-body); font-size: 13px; }
+  .movelist-row { display: grid; grid-template-columns: 28px 1fr 1fr; gap: 6px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+  .movelist-row .num { color: var(--muted); }
+  .movelist .san { color: var(--ink-soft); display: inline-flex; align-items: center; gap: 5px; }
+  .movelist .bait-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .movelist .bait-dot.taken { background: var(--status-good); }
+  .movelist .bait-dot.missed { background: var(--status-info); }
+  .movelist .empty { color: var(--muted); font-style: italic; }
+
+  /* --- stats --- */
+  .stat-row { display: flex; justify-content: space-between; font-family: var(--font-body); font-size: 13px; padding: 5px 0; }
+  .stat-row .v { color: var(--ink); font-weight: 700; }
+  .hint { color: var(--muted); font-size: 11.5px; margin-top: 8px; line-height: 1.5; }
+
+  details.howitworks { font-family: var(--font-body); font-size: 12.5px; color: var(--ink-soft); }
+  details.howitworks summary { cursor: pointer; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; }
+  details.howitworks p { margin: 8px 0 0; line-height: 1.6; }
+
+  /* --- promotion modal --- */
+  .promo-modal { position: absolute; inset: 0; background: color-mix(in srgb, var(--paper) 80%, transparent); display: flex; align-items: center; justify-content: center; border-radius: 3px; }
+  .promo-inner { background: var(--surface); border: 1px solid var(--accent); border-radius: 6px; padding: 14px; display: flex; gap: 8px; }
+  .promo-inner button { font-size: 26px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; width: 48px; height: 48px; cursor: pointer; color: var(--ink); }
+  .promo-inner button:hover { border-color: var(--accent); }
+
+  .over-banner { margin-top: 10px; padding: 10px 12px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--accent); font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--accent-soft); }
+
+  footer.note { margin-top: 34px; padding-top: 16px; border-top: 1px dashed var(--line); color: var(--muted); font-size: 12px; font-family: var(--font-body); }
+
+  @media (max-width: 760px) {
+    .masthead h1 { font-size: 24px; }
+    .badge-row { justify-content: flex-start; max-width: 100%; }
+    .board-col, .side-col { max-width: 100%; flex-basis: 100%; }
+  }
+</style>
+
+<div class="page">
+  <div class="masthead">
+    <div>
+      <p class="eyebrow">practice session</p>
+      <div class="title-row">
+        <h1>Blunder Bait</h1>
+        <button class="btn ghost" id="btnReview">Review ↗</button>
+      </div>
+      <p class="sub">A sparring partner that leans into the tactical pattern you actually miss most — bot level and target recalculated from your latest bulk_review.py data each time you start a session.</p>
+    </div>
+    <div class="badge-row" id="weaknessBadges"></div>
+  </div>
+
+  <div class="layout" id="practiceLayout">
+    <div class="board-col">
+      <div class="panel rating-widget">
+        <h3>Opponent Rating</h3>
+        <select id="ratingSelect"></select>
+        <p class="hint" id="ratingHint"></p>
+      </div>
+      <div class="board-wrap">
+        <div class="board-bar" id="barTop"></div>
+        <svg class="board-svg" id="boardSvg" viewBox="0 0 400 400" role="img" aria-label="Chess board"></svg>
+        <div class="board-bar" id="barBottom"></div>
+        <div class="setup-card" id="setupCard">
+          <div class="setup-inner">
+            <h3 style="margin-bottom:10px;">Choose your side</h3>
+            <p>The bot plays a deliberately shallow engine calibrated to your current rating band (see the badge above, or override it with the Opponent Rating dropdown) that favors moves matching your real blunder patterns — hung material, discovered attack, fork, and pin, each tried more or less often in proportion to how common it is in your own recent blunders.</p>
+            <div class="color-btns">
+              <button class="btn primary" id="btnWhite">Play White</button>
+              <button class="btn primary" id="btnBlack">Play Black</button>
+            </div>
+          </div>
+        </div>
+        <div class="promo-modal" id="promoModal" hidden>
+          <div class="promo-inner" id="promoInner"></div>
+        </div>
+      </div>
+      <div class="status-line" id="statusLine"><span class="dot"></span><span id="statusText">Choose a side to begin.</span></div>
+      <div id="overBanner"></div>
+    </div>
+
+    <div class="side-col">
+      <div class="panel">
+        <h3>Trap log</h3>
+        <div class="stat-row"><span>Bait offered</span><span class="v tabular" id="statOffered">0</span></div>
+        <div class="stat-row"><span>Bait taken</span><span class="v tabular" id="statTaken">0</span></div>
+        <div class="stat-row"><span>Your mistakes punished</span><span class="v tabular" id="statPunished">0</span></div>
+        <p class="hint">Whenever the bot's move leaves a piece hanging, or opens up a discovered attack, fork, or pin, that's one offer. Hung material is taken by capturing it outright; the other three are taken by finding and playing the specific move that creates them. The bot also plays the other side: when you leave a piece hanging, or allow a fork, pin, or discovered attack, it goes after it (counted as Your mistakes punished). A dot appears next to its bait move below once it resolves — filled green if you took it, hollow cyan if it slipped by.</p>
+      </div>
+      <div class="panel">
+        <h3>History</h3>
+        <div class="puzzle-meta" id="historyBody">Session history loads once storage connects.</div>
+      </div>
+      <div class="panel">
+        <h3>Move list</h3>
+        <div class="movelist" id="moveList"><span class="empty">No moves yet.</span></div>
+      </div>
+      <div class="panel">
+        <button class="btn full" id="btnNewGame">New game</button>
+        <details class="howitworks" style="margin-top:14px;">
+          <summary>How this works</summary>
+          <p id="howWeaknessText"></p>
+          <p id="howEngineText"></p>
+          <p>Scope: all four motifs review.py's Missed Moves section detects are now wired up — hung material, discovered attack, fork, and pin, added across 2026-09-21, with bait frequency now weighted by your latest blunder mix. "Discovered check" is the one motif from that section still not baited.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout" id="reviewLayout" hidden>
+    <div class="board-col">
+      <div class="board-wrap">
+        <div class="board-bar" id="reviewBarTop"></div>
+        <svg class="board-svg" id="reviewBoardSvg" viewBox="0 0 400 400" role="img" aria-label="Puzzle board"></svg>
+        <div class="board-bar" id="reviewBarBottom"></div>
+      </div>
+      <div class="status-line" id="reviewStatusLine"><span class="dot"></span><span id="reviewStatusText">Loading…</span></div>
+      <div id="reviewFeedback"></div>
+    </div>
+    <div class="side-col">
+      <div class="panel">
+        <h3>This week's key moments</h3>
+        <div class="stat-row"><span>Puzzle</span><span class="v tabular" id="reviewIdx">–</span></div>
+        <div class="stat-row"><span>First try</span><span class="v tabular" id="reviewCorrect">0</span></div>
+        <p class="puzzle-meta" id="reviewSetMeta"></p>
+        <p class="puzzle-meta" id="reviewMeta"></p>
+      </div>
+      <div class="panel">
+        <div class="nav-row">
+          <button class="btn" id="btnReviewPrev">◀ Prev</button>
+          <button class="btn" id="btnReviewNext">Next ▶</button>
+        </div>
+        <button class="btn full" id="btnReviewExit" style="margin-top:8px;">Back to practice</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="note" id="footerNote"></footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var PIECE_GLYPH = { p:"♟", n:"♞", b:"♝", r:"♜", q:"♛", k:"♚" };
+  var PIECE_VALUE = { p:100, n:300, b:300, r:500, q:900, k:0 };
+  var PIECE_NAME = { p:"pawn", n:"knight", b:"bishop", r:"rook", q:"queen", k:"king" };
+  var CENTER_BONUS = [
+    [0,1,2,3,3,2,1,0],[1,2,3,4,4,3,2,1],[2,3,4,5,5,4,3,2],[3,4,5,6,6,5,4,3],
+    [3,4,5,6,6,5,4,3],[2,3,4,5,5,4,3,2],[1,2,3,4,4,3,2,1],[0,1,2,3,3,2,1,0]
+  ];
+  // Filled in at build time by scripts/build.py from the most recent
+  // bulk_review.py batch data — see that script for how these are
+  // computed. Left as empty objects here since this file is never opened
+  // directly, only ever through build.py's output.
+  var WEAKNESS = {"pct": 43.2, "count": 115, "total": 266, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)", "dominant": false, "allowed": {"hung_material": {"count": 115, "total": 266, "pct": 43.2, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)"}, "discovered_attack": {"count": 21, "total": 266, "pct": 7.9, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)"}, "fork": {"count": 18, "total": 266, "pct": 6.8, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)"}, "pin": {"count": 9, "total": 266, "pct": 3.4, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)"}}, "patterns": [{"id": "hung_material", "name": "hung material", "count": 115, "total": 266, "pct": 43.2, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)"}, {"id": "discovered_attack", "name": "discovered attack", "count": 25, "total": 266, "pct": 9.4, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)"}, {"id": "fork", "name": "fork", "count": 9, "total": 266, "pct": 3.4, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)"}, {"id": "pin", "name": "pin", "count": 18, "total": 266, "pct": 6.8, "source": "last 50 rated rapid games (2026.09.12\u20132026.09.15)"}]};
+  var TUNING = {"tolerance": 90, "noise": 30, "replyCap": 8, "candidateCap": 14, "label": "under 350", "depth": 2, "eloValue": 339};
+  // Full difficulty-band table (see build.py's ELO_BANDS) for the Opponent
+  // Rating dropdown — TUNING above is just the auto-calibrated pick from
+  // that same table, kept as its own variable so "Auto" always means
+  // whatever your current rating actually maps to, not a fixed default.
+  var BANDS = [{"tolerance": 90, "noise": 30, "replyCap": 8, "candidateCap": 14, "label": "under 350", "depth": 2, "id": 0}, {"tolerance": 75, "noise": 26, "replyCap": 9, "candidateCap": 16, "label": "350-450", "depth": 2, "id": 1}, {"tolerance": 60, "noise": 22, "replyCap": 10, "candidateCap": 18, "label": "450-550", "depth": 2, "id": 2}, {"tolerance": 45, "noise": 18, "replyCap": 11, "candidateCap": 20, "label": "550-650", "depth": 2, "id": 3}, {"tolerance": 30, "noise": 14, "replyCap": 12, "candidateCap": 22, "label": "650+", "depth": 3, "id": 4}];
+  // "This week's key moments" puzzle set — see build.py's find_week_puzzles.
+  var PUZZLES = [{"fen": "r2qkb1r/1ppb1ppp/p1np1n2/4p3/Q1BPP3/2P2P2/PP4PP/RNB1K1NR b KQkq - 1 7", "best": "b5", "played": "Be6", "tag": "blunder", "cpl": 700, "phase": "opening", "color": "b", "opp": "JoeKnowles98", "date": "2026.09.09", "url": "https://www.chess.com/game/live/174239359602", "end_time": 1788981226, "label": "fork", "why": ["The pawn now attacks their queen and bishop at once, and they can only save one.", "After your real move, their best reply was d5.", "Your move cost about 7.0 pawns compared with this one."], "review": "review-174239359602.html"}, {"fen": "r1bqkbnr/pp1p2pp/2p2p2/3Np3/3nP3/3P1N2/PPP2PPP/R1BQKB1R w KQkq - 0 6", "best": "Nxd4", "played": "Nb4", "tag": "blunder", "cpl": 782, "phase": "opening", "color": "w", "opp": "Zarpelu", "date": "2026.09.09", "url": "https://www.chess.com/game/live/174248204660", "end_time": 1788998741, "label": "positional", "why": ["It captures the knight.", "Your move in the real game left material hanging: they answered Nxf3+.", "Your move cost about 7.8 pawns compared with this one."], "review": "review-174248204660.html"}, {"fen": "r2qkb1r/ppp2ppp/2n1bn2/3pp3/2PPP3/3B1N2/PP3PPP/RNBQK2R b KQkq - 0 6", "best": "dxe4", "played": "Bd6", "tag": "blunder", "cpl": 989, "phase": "opening", "color": "b", "opp": "gator1290", "date": "2026.09.10", "url": "https://www.chess.com/game/live/174250957868", "end_time": 1789005378, "label": "fork", "why": ["It captures the pawn.", "The pawn now attacks their bishop and knight at once, and they can only save one.", "Moving this piece uncovers an attack from another piece behind it, so two things are threatened at once.", "Your move in the real game left material hanging: they answered cxd5.", "Your move cost about 9.9 pawns compared with this one."], "review": "review-174250957868.html"}, {"fen": "r1bk1r2/ppp3pp/2n1q3/1N2pp2/2Pp4/1PnP1N2/P1Q2PPP/R3KB1R b KQ - 2 13", "best": "Nxb5", "played": "e4", "tag": "blunder", "cpl": 825, "phase": "middlegame", "color": "b", "opp": "frankiekidney", "date": "2026.09.10", "url": "https://www.chess.com/game/live/174251610582", "end_time": 1789007479, "label": "positional", "why": ["It captures the knight.", "Your move in the real game left material hanging: they answered Nfxd4.", "Your move cost about 8.2 pawns compared with this one."], "review": "review-174251610582.html"}, {"fen": "r1b2rk1/pp1nnppp/1b6/1B1pq1N1/1P6/2PQB3/P4PPP/RN3RK1 b - - 1 13", "best": "Ng6", "played": "a6", "tag": "blunder", "cpl": 100010, "phase": "middlegame", "color": "b", "opp": "mihenzl", "date": "2026.09.10", "url": "https://www.chess.com/game/live/174254848448", "end_time": 1789015220, "label": "positional", "why": ["No single tactic stands out here. The engine prefers it for position or a longer line than a quick check can spell out.", "Your move in the real game left material hanging: they answered Qxh7#.", "The swing here was mate-sized."], "review": "review-174254848448.html"}, {"fen": "8/pQ5p/6pk/3B4/3PrKP1/P2b3P/3N4/2Bq4 w - - 7 37", "best": "Bxe4", "played": "Kg3", "tag": "blunder", "cpl": 100731, "phase": "middlegame", "color": "w", "opp": "Dheeshnuts", "date": "2026.09.10", "url": "https://www.chess.com/game/live/174255098032", "end_time": 1789017066, "label": "winning trade", "why": ["It takes a rook with a bishop, so even after the recapture you come out ahead.", "After your real move, their best reply was Qg1+.", "The swing here was mate-sized."], "review": "review-174255098032.html"}, {"fen": "3rr1k1/pp3pp1/2p2q1p/2n5/8/3N1B2/PPPK1BPP/R3R3 w - - 9 24", "best": "Rxe8+", "played": "Rad1", "tag": "blunder", "cpl": 700, "phase": "middlegame", "color": "w", "opp": "Ivan-We", "date": "2026.09.11", "url": "https://www.chess.com/game/live/174297110784", "end_time": 1789086346, "label": "check", "why": ["It captures the rook.", "It gives check, which limits their replies.", "Your move in the real game left material hanging: they answered Rxd3+.", "Your move cost about 7.0 pawns compared with this one."], "review": "review-174297110784.html"}, {"fen": "3k4/ppp4p/3b4/5R2/2P5/5bP1/P4P1P/5K2 b - - 2 29", "best": "Be4", "played": "Bd1", "tag": "blunder", "cpl": 667, "phase": "endgame", "color": "b", "opp": "SMELL_DA_DOGS", "date": "2026.09.11", "url": "https://www.chess.com/game/live/174297569306", "end_time": 1789087840, "label": "saves a piece", "why": ["It rescues a piece of yours that was under attack.", "After your real move, their best reply was c5.", "Your move cost about 6.7 pawns compared with this one."], "review": "review-174297569306.html"}, {"fen": "r4rk1/2pb2p1/2n1p2p/8/Pp1P4/B5P1/2Q3PP/bN2R1K1 w - - 0 26", "best": "Bb2", "played": "Qc5", "tag": "blunder", "cpl": 706, "phase": "middlegame", "color": "w", "opp": "ClaudioTomate", "date": "2026.09.11", "url": "https://www.chess.com/game/live/174336875120", "end_time": 1789155945, "label": "saves a piece", "why": ["It rescues a piece of yours that was under attack.", "Your move in the real game left material hanging: they answered Bxd4+.", "Your move cost about 7.1 pawns compared with this one."], "review": "review-174336875120.html"}, {"fen": "r1bq3r/ppp1nk1p/2nb2p1/3Np3/3P4/4PQ2/PPP2PPP/R1B1KBNR b KQ - 2 9", "best": "Bf5", "played": "Kg7", "tag": "blunder", "cpl": 869, "phase": "opening", "color": "b", "opp": "DadOfaBoySon", "date": "2026.09.12", "url": "https://www.chess.com/game/live/174350625340", "end_time": 1789185494, "label": "positional", "why": ["No single tactic stands out here. The engine prefers it for position or a longer line than a quick check can spell out.", "After your real move, their best reply was Qf6+.", "Your move cost about 8.7 pawns compared with this one."], "review": "review-174350625340.html"}, {"fen": "r4b1r/p6p/2Q3p1/q1B2k2/5Pn1/2P5/P5PP/4RRK1 w - - 1 27", "best": "Qe6#", "played": "Qxa8", "tag": "blunder", "cpl": 100775, "phase": "middlegame", "color": "w", "opp": "killjotlive", "date": "2026.09.12", "url": "https://www.chess.com/game/live/174351391656", "end_time": 1789188229, "label": "checkmate", "why": ["It is checkmate.", "Your move in the real game left material hanging: they answered Bxc5+.", "The swing here was mate-sized."], "review": "review-174351391656.html"}, {"fen": "4rrk1/p1pbqppp/3b1n2/8/P1P5/2QP1P2/1P2N2P/RNB1K2R b KQ - 0 14", "best": "Qxe2#", "played": "Rb8", "tag": "blunder", "cpl": 99696, "phase": "middlegame", "color": "b", "opp": "sarvinagesh", "date": "2026.09.12", "url": "https://www.chess.com/game/live/174389513476", "end_time": 1789250883, "label": "checkmate", "why": ["It is checkmate.", "After your real move, their best reply was Qd2.", "The swing here was mate-sized."], "review": "review-174389513476.html"}, {"fen": "r1bqk2r/pppp1ppp/5n2/8/3nP3/P1P5/2P2PPP/R1BQKB1R w KQkq - 0 8", "best": "Qxd4", "played": "Rb1", "tag": "blunder", "cpl": 681, "phase": "opening", "color": "w", "opp": "RICKIWII", "date": "2026.09.12", "url": "https://www.chess.com/game/live/174390079884", "end_time": 1789251787, "label": "free piece", "why": ["It captures an undefended knight, and nothing can take back.", "After your real move, their best reply was Nc6.", "Your move cost about 6.8 pawns compared with this one."], "review": "review-174390079884.html"}, {"fen": "r1bqk2r/ppp2ppp/2nb1n2/3pp3/3P4/4PNB1/PPP1BPPP/RN1QK2R b KQkq - 5 6", "best": "exd4", "played": "O-O", "tag": "blunder", "cpl": 774, "phase": "opening", "color": "b", "opp": "Drizop", "date": "2026.09.14", "url": "https://www.chess.com/game/live/174441320450", "end_time": 1789348762, "label": "discovered attack", "why": ["It captures the pawn.", "Moving this piece uncovers an attack from another piece behind it, so two things are threatened at once.", "Your move in the real game left material hanging: they answered dxe5.", "Your move cost about 7.7 pawns compared with this one."], "review": "review-174441320450.html"}, {"fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/4P3/1PN4N/PBPP1PPP/R2QKB1R b KQkq - 2 5", "best": "d6", "played": "Ng4", "tag": "blunder", "cpl": 820, "phase": "opening", "color": "b", "opp": "Krishgupta20", "date": "2026.09.14", "url": "https://www.chess.com/game/live/174450132944", "end_time": 1789368725, "label": "discovered attack", "why": ["Moving this piece uncovers an attack from another piece behind it, so two things are threatened at once.", "Your move in the real game left material hanging: they answered Qxg4.", "Your move cost about 8.2 pawns compared with this one."], "review": "review-174450132944.html"}, {"fen": "r1bqk2r/ppp2ppp/5n2/3P4/5b2/2NQ1N2/PPP2PPP/R3K2R b KQkq - 0 10", "best": "O-O", "played": "Nxd5", "tag": "blunder", "cpl": 706, "phase": "opening", "color": "b", "opp": "pattyizzy", "date": "2026.09.14", "url": "https://www.chess.com/game/live/174487880426", "end_time": 1789427908, "label": "positional", "why": ["No single tactic stands out here. The engine prefers it for position or a longer line than a quick check can spell out.", "Your move in the real game left material hanging: they answered Nxd5.", "Your move cost about 7.1 pawns compared with this one."], "review": "review-174487880426.html"}, {"fen": "8/1B3p2/8/6q1/1P1k4/8/2K5/4Q3 b - - 0 43", "best": "Qg6+", "played": "Qg2+", "tag": "blunder", "cpl": 99391, "phase": "endgame", "color": "b", "opp": "saptanshu-paul", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174494564780", "end_time": 1789445528, "label": "check", "why": ["It gives check, which limits their replies.", "Your move in the real game left material hanging: they answered Bxg2.", "The swing here was mate-sized."], "review": "review-174494564780.html"}, {"fen": "8/Bpp5/4k3/3b4/3P2p1/1P2Q1P1/P1P1K3/5r1r b - - 1 36", "best": "Kf7", "played": "Kd6", "tag": "blunder", "cpl": 99916, "phase": "endgame", "color": "b", "opp": "Ivanthenotsobad", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174495256202", "end_time": 1789447970, "label": "positional", "why": ["No single tactic stands out here. The engine prefers it for position or a longer line than a quick check can spell out.", "After your real move, their best reply was Bc5+.", "The swing here was mate-sized."], "review": "review-174495256202.html"}, {"fen": "2b1k3/1p1p1p1p/5p2/6rq/1R2PK2/3BB3/5PPP/2R5 w - - 5 26", "best": "Rxc8+", "played": "g4", "tag": "blunder", "cpl": 100264, "phase": "middlegame", "color": "w", "opp": "TheAdetunji", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174497298258", "end_time": 1789451558, "label": "free piece", "why": ["It captures an undefended bishop, and nothing can take back.", "It gives check, which limits their replies.", "Your move in the real game left material hanging: they answered Qxg4#.", "The swing here was mate-sized."], "review": "review-174497298258.html"}, {"fen": "r3k2Q/ppp2q2/2n1b3/8/3p1P2/P4N2/1P5P/R1B1R1K1 b - - 3 30", "best": "Kd7", "played": "Qg8+", "tag": "blunder", "cpl": 99276, "phase": "middlegame", "color": "b", "opp": "dissonannt", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174497811144", "end_time": 1789452291, "label": "discovered attack", "why": ["Moving this piece uncovers an attack from another piece behind it, so two things are threatened at once.", "Your move in the real game left material hanging: they answered Qxg8+.", "The swing here was mate-sized."], "review": "review-174497811144.html"}, {"fen": "r1bqkbnr/pppp1ppp/2n5/4p2Q/2B5/4P3/PPPP1PPP/RNB1K1NR b KQkq - 3 3", "best": "d5", "played": "Nf6", "tag": "blunder", "cpl": 100165, "phase": "opening", "color": "b", "opp": "Joseph_Beko", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174498863500", "end_time": 1789453926, "label": "positional", "why": ["No single tactic stands out here. The engine prefers it for position or a longer line than a quick check can spell out.", "Your move in the real game left material hanging: they answered Qxf7#.", "The swing here was mate-sized."], "review": "review-174498863500.html"}, {"fen": "3q2k1/pp4pp/4pn2/2r5/4PP2/P1N2Q2/2P3PP/2K2B1R w - - 0 24", "best": "Nb1", "played": "Qf2", "tag": "blunder", "cpl": 698, "phase": "middlegame", "color": "w", "opp": "WINorNUKE", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174499548514", "end_time": 1789456227, "label": "positional", "why": ["No single tactic stands out here. The engine prefers it for position or a longer line than a quick check can spell out.", "Your move in the real game left material hanging: they answered Rxc3.", "Your move cost about 7.0 pawns compared with this one."], "review": "review-174499548514.html"}, {"fen": "r1b1kb1r/ppp1qpp1/2n4p/1B1np3/3Q4/5N2/PPPP1PPP/RNB1K2R b KQkq - 1 8", "best": "exd4+", "played": "a6", "tag": "blunder", "cpl": 997, "phase": "opening", "color": "b", "opp": "amitvaiya", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174499983656", "end_time": 1789456440, "label": "free piece", "why": ["It captures an undefended queen, and nothing can take back.", "Moving this piece uncovers a check from another piece behind it.", "It rescues a piece of yours that was under attack.", "Your move in the real game left material hanging: they answered Bxc6+.", "Your move cost about 10.0 pawns compared with this one."], "review": "review-174499983656.html"}, {"fen": "3r4/p1pk1pp1/2n4p/8/4r1b1/2PB4/PQP2qPP/1RK4R b - - 1 21", "best": "Qf4#", "played": "Qxg2", "tag": "blunder", "cpl": 99249, "phase": "middlegame", "color": "b", "opp": "Whogoutammahato", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174500081992", "end_time": 1789457054, "label": "checkmate", "why": ["It is checkmate.", "After your real move, their best reply was Rf1.", "The swing here was mate-sized."], "review": "review-174500081992.html"}, {"fen": "r1b1kr2/pp1pq1pp/8/4n3/5Q2/2N1B3/PPP2PPP/R3KB1R w KQq - 3 16", "best": "Qg3", "played": "Bd4", "tag": "blunder", "cpl": 100906, "phase": "middlegame", "color": "w", "opp": "XiAzam234", "date": "2026.09.15", "url": "https://www.chess.com/game/live/174501061210", "end_time": 1789459192, "label": "saves a piece", "why": ["It rescues a piece of yours that was under attack.", "After your real move, their best reply was Nf3+.", "The swing here was mate-sized."], "review": "review-174501061210.html"}];
+  var PUZZLE_META = {"count": 25, "games_in_week": 72, "games_with_key_moment": 69, "week_range": "2026.09.09\u20132026.09.15", "with_review": 25};
+
+  var state = {
+    screen: "setup", humanColor: null, botColor: null,
+    game: null, selected: null, legalTargets: [],
+    thinking: false, over: false, overText: "",
+    history: [], lastMove: null, lastBait: null,
+    baitOffered: 0, baitTaken: 0, pendingPromotion: null,
+    // "auto" tracks your calibrated rating (TUNING); any other value is an
+    // index into BANDS, a deliberate manual override for this browser tab
+    // only — never written back anywhere, same as the rest of this page's
+    // state (see the footer note).
+    ratingChoice: "auto",
+    bait: {}, punish: {}, lastPunish: null, logged: false,
+    review: {
+      idx: 0, correct: 0, attempted: 0, sessionTs: null, ref: null, writeChain: null,
+      answered: false, lastCorrect: null,
+      game: null, target: null, selected: null, legalTargets: [], lastMove: null
+    }
+  };
+
+  function activeTuning() {
+    if (state.ratingChoice === "auto" || !BANDS.length) return TUNING;
+    var band = BANDS[state.ratingChoice];
+    return band || TUNING;
+  }
+
+  function squareRF(sq) {
+    var file = sq.charCodeAt(0) - 97;
+    var rank = 8 - parseInt(sq[1], 10);
+    return [rank, file];
+  }
+  function rfSquare(r, f) {
+    return String.fromCharCode(97 + f) + (8 - r);
+  }
+
+  // ---- engine ----
+  function evalPosition(game, botColor) {
+    var board = game.board();
+    var score = 0;
+    for (var r = 0; r < 8; r++) {
+      for (var f = 0; f < 8; f++) {
+        var p = board[r][f];
+        if (!p) continue;
+        var val = PIECE_VALUE[p.type] + CENTER_BONUS[r][f] * (p.type === "k" ? 0 : 1.5);
+        score += (p.color === botColor) ? val : -val;
+      }
+    }
+    return score;
+  }
+
+  function findHangingPiece(game, ownerColor) {
+    // Called with `game` positioned so the OPPONENT of ownerColor is to move.
+    // Mirrors review.py's own "capturable, no legal recapture" loose-piece check.
+    var mover = ownerColor === "w" ? "b" : "w";
+    if (game.turn() !== mover) return null;
+    var moves = game.moves({ verbose: true });
+    var best = null;
+    for (var i = 0; i < moves.length; i++) {
+      var mv = moves[i];
+      if (!mv.captured) continue;
+      var targetSq = mv.to;
+      game.move(mv);
+      var recaptures = game.moves({ verbose: true });
+      var canRecapture = recaptures.some(function (m) { return m.to === targetSq && m.captured; });
+      game.undo();
+      if (!canRecapture) {
+        var value = PIECE_VALUE[mv.captured];
+        if (!best || value > best.value) {
+          best = { square: targetSq, piece: mv.captured, value: value, via: mv.san, viaFrom: mv.from, viaTo: mv.to };
+        }
+      }
+    }
+    return best;
+  }
+
+  // Discovered-attack bait — added 2026-09-21, the second pattern this bot
+  // targets, chosen over fork/pin by real frequency data (10-11% of
+  // blunders vs. ~4% and ~3.5%, 2026-09-21). Mirrors
+  // review.py's find_motifs() "discovered attack" case: some piece
+  // is newly attacked by a DIFFERENT piece than the one that just moved —
+  // the moved piece unblocked a line rather than attacking directly itself.
+  //
+  // Geometric, not simulation-based, unlike findHangingPiece: a first
+  // version tried the same "make each of the opponent's legal replies, then
+  // recheck what's attacked" approach findHangingPiece uses, and it failed
+  // two ways at once — capping the reply list for speed (same pattern used
+  // everywhere else in this file) could randomly drop the exact quiet move
+  // that reveals a discovery, and even uncapped it was too slow (up to
+  // 4.5s/move in testing, well past this file's established budget).
+  // Instead: directly trace each of the opponent's own sliding pieces
+  // (rook/bishop/queen) along their four/eight directions for the shape a
+  // discovered attack actually requires — one of the opponent's OWN pieces
+  // (the blocker) sitting directly between the slider and a bot piece (the
+  // victim), with the blocker able to legally step off that exact line.
+  // No move-by-move simulation, no capping needed — bounded by board size
+  // (at most a handful of sliding pieces x 4 directions each), so it's both
+  // correct (nothing can be randomly missed) and fast.
+  var SLIDER_DIRS = {
+    r: [[-1, 0], [1, 0], [0, -1], [0, 1]],
+    b: [[-1, -1], [-1, 1], [1, -1], [1, 1]]
+  };
+  SLIDER_DIRS.q = SLIDER_DIRS.r.concat(SLIDER_DIRS.b);
+
+  // First two pieces hit walking the board from (r,f) in direction (dr,df):
+  // the immediate blocker and whatever's directly beyond it, if anything —
+  // exactly the "one piece in between" shape a discovered attack needs.
+  function traceLine(board, r, f, dr, df) {
+    var rr = r + dr, ff = f + df, first = null;
+    while (rr >= 0 && rr < 8 && ff >= 0 && ff < 8) {
+      var p = board[rr][ff];
+      if (p) {
+        if (!first) first = { r: rr, f: ff, piece: p };
+        else return { blocker: first, beyond: { r: rr, f: ff, piece: p } };
+      }
+      rr += dr; ff += df;
+    }
+    return null;
+  }
+
+  // Does (destR,destF) still lie on the same ray from (originR,originF) in
+  // direction (dr,df)? If so, moving the blocker there still blocks the line.
+  function staysOnLine(originR, originF, dr, df, destR, destF) {
+    var diffR = destR - originR, diffF = destF - originF;
+    if (dr === 0) return diffF === 0 ? false : (df !== 0 && diffR === 0 && (diffF / df) > 0);
+    if (df === 0) return diffR === 0 ? false : (diffF === 0 && (diffR / dr) > 0);
+    if (Math.abs(diffR) !== Math.abs(diffF)) return false;
+    var k = diffR / dr;
+    return k > 0 && (diffF / df) === k;
+  }
+
+  function findDiscoveredAttack(game, ownerColor) {
+    var mover = ownerColor === "w" ? "b" : "w";
+    if (game.turn() !== mover) return null;
+    var board = game.board();
+    for (var r = 0; r < 8; r++) {
+      for (var f = 0; f < 8; f++) {
+        var slider = board[r][f];
+        if (!slider || slider.color !== mover) continue;
+        var dirs = SLIDER_DIRS[slider.type];
+        if (!dirs) continue;
+        for (var d = 0; d < dirs.length; d++) {
+          var line = traceLine(board, r, f, dirs[d][0], dirs[d][1]);
+          if (!line || !line.beyond) continue;
+          if (line.blocker.piece.color !== mover) continue; // only the mover's own piece can be moved to reveal this
+          if (line.beyond.piece.color !== ownerColor || line.beyond.piece.type === "k") continue;
+          var blockerSq = rfSquare(line.blocker.r, line.blocker.f);
+          var blockerMoves = game.moves({ square: blockerSq, verbose: true });
+          for (var mi = 0; mi < blockerMoves.length; mi++) {
+            var mv = blockerMoves[mi];
+            var dest = squareRF(mv.to);
+            if (staysOnLine(r, f, dirs[d][0], dirs[d][1], dest[0], dest[1])) continue;
+            var victim = line.beyond.piece;
+            return {
+              square: rfSquare(line.beyond.r, line.beyond.f), piece: victim.type, value: PIECE_VALUE[victim.type],
+              via: mv.san, viaFrom: mv.from, viaTo: mv.to
+            };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  var KNIGHT_OFFSETS = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+
+  // Raw attack squares for a piece sitting at (r,f), python-chess's
+  // board.attacks() equivalent — chess.js has nothing like it, so this is
+  // hand-computed per piece type, reusing SLIDER_DIRS for the sliding
+  // pieces (same table findDiscoveredAttack uses) and stopping a slider's
+  // ray at (but including) the first piece it hits, same as traceLine.
+  function attackSquares(board, r, f, piece) {
+    var out = [];
+    if (piece.type === "n") {
+      KNIGHT_OFFSETS.forEach(function (o) {
+        var rr = r + o[0], ff = f + o[1];
+        if (rr >= 0 && rr < 8 && ff >= 0 && ff < 8) out.push([rr, ff]);
+      });
+    } else if (piece.type === "p") {
+      var dr = piece.color === "w" ? -1 : 1; // white attacks toward rank 8 (r decreasing)
+      [[dr, -1], [dr, 1]].forEach(function (o) {
+        var rr = r + o[0], ff = f + o[1];
+        if (rr >= 0 && rr < 8 && ff >= 0 && ff < 8) out.push([rr, ff]);
+      });
+    } else if (piece.type === "k") {
+      for (var dr2 = -1; dr2 <= 1; dr2++) for (var df2 = -1; df2 <= 1; df2++) {
+        if (dr2 === 0 && df2 === 0) continue;
+        var rr2 = r + dr2, ff2 = f + df2;
+        if (rr2 >= 0 && rr2 < 8 && ff2 >= 0 && ff2 < 8) out.push([rr2, ff2]);
+      }
+    } else {
+      SLIDER_DIRS[piece.type].forEach(function (d) {
+        var rr3 = r + d[0], ff3 = f + d[1];
+        while (rr3 >= 0 && rr3 < 8 && ff3 >= 0 && ff3 < 8) {
+          out.push([rr3, ff3]);
+          if (board[rr3][ff3]) break;
+          rr3 += d[0]; ff3 += d[1];
+        }
+      });
+    }
+    return out;
+  }
+
+  // Fork bait — added 2026-09-21, same session as discovered attack, third
+  // in the bait-selection fallback chain (see computeBotMove). Built before
+  // pin: fork's geometry is
+  // self-contained (checkable straight off the moved piece's own attack
+  // squares), where pin additionally needs "and the king is the next piece
+  // beyond." Mirrors review.py's find_motifs() fork case: the piece
+  // that just moved now attacks 2+ enemy pieces worth a knight or more, and
+  // isn't itself recapturable by something cheaper. Same "opponent to move"
+  // precondition as the other bait checks. No capping needed, unlike the
+  // first (later replaced) discovered-attack attempt — cost per candidate
+  // move is a handful of attack-square lookups plus one real legal-move
+  // query for the recapture check (no fake-turn trick required here: after
+  // the opponent's candidate move it's genuinely the bot's turn again, so
+  // the bot's own real recapture options are directly queryable).
+  function findFork(game, ownerColor) {
+    var mover = ownerColor === "w" ? "b" : "w";
+    if (game.turn() !== mover) return null;
+    var candidateMoves = game.moves({ verbose: true });
+    for (var i = 0; i < candidateMoves.length; i++) {
+      var m = candidateMoves[i];
+      game.move(m);
+      var found = null;
+      var board = game.board();
+      var toRF = squareRF(m.to);
+      var piece = board[toRF[0]][toRF[1]];
+      if (piece && piece.type !== "k") {
+        var atk = attackSquares(board, toRF[0], toRF[1], piece);
+        var targets = atk
+          .map(function (sq) { return { sq: sq, piece: board[sq[0]][sq[1]] }; })
+          .filter(function (t) { return t.piece && t.piece.color === ownerColor && t.piece.type !== "k" && PIECE_VALUE[t.piece.type] >= 300; });
+        if (targets.length >= 2) {
+          var botReplies = game.moves({ verbose: true });
+          var cheapestRecapture = null;
+          botReplies.forEach(function (rm) {
+            if (rm.to !== m.to || !rm.captured) return;
+            var attackerPiece = game.get(rm.from);
+            var v = attackerPiece ? PIECE_VALUE[attackerPiece.type] : 0;
+            if (cheapestRecapture === null || v < cheapestRecapture) cheapestRecapture = v;
+          });
+          if (cheapestRecapture === null || cheapestRecapture >= PIECE_VALUE[piece.type]) {
+            targets.sort(function (a, b) { return PIECE_VALUE[b.piece.type] - PIECE_VALUE[a.piece.type]; });
+            var victim = targets[0];
+            found = {
+              square: rfSquare(victim.sq[0], victim.sq[1]), piece: victim.piece.type, value: PIECE_VALUE[victim.piece.type],
+              via: m.san, viaFrom: m.from, viaTo: m.to
+            };
+          }
+        }
+      }
+      game.undo();
+      if (found) return found;
+    }
+    return null;
+  }
+
+  // Every square of victimColor's currently pinned by one of moverColor's
+  // sliders — reuses traceLine exactly as findDiscoveredAttack does (first
+  // two pieces hit along a ray), just with different color conditions: a
+  // pin is "blocker belongs to the VICTIM, and the piece beyond it is the
+  // VICTIM's own king" (discovered attack's blocker belongs to the MOVER
+  // instead, and the piece beyond belongs to the victim). Naturally covers
+  // both ways a pin can appear — a slider moving onto a fresh ray that
+  // immediately finds victim-piece-then-king, or some other piece clearing
+  // out of a ray the slider already had — since this recomputes the whole
+  // board's pins from scratch on whatever position it's given; findPin
+  // below diffs it before/after a candidate move rather than needing two
+  // separate code paths for the two cases.
+  function pinnedSquares(board, moverColor, victimColor) {
+    var pins = [];
+    for (var r = 0; r < 8; r++) {
+      for (var f = 0; f < 8; f++) {
+        var slider = board[r][f];
+        if (!slider || slider.color !== moverColor) continue;
+        var dirs = SLIDER_DIRS[slider.type];
+        if (!dirs) continue;
+        for (var d = 0; d < dirs.length; d++) {
+          var line = traceLine(board, r, f, dirs[d][0], dirs[d][1]);
+          if (!line || !line.beyond) continue;
+          if (line.blocker.piece.color !== victimColor) continue;
+          if (line.beyond.piece.color !== victimColor || line.beyond.piece.type !== "k") continue;
+          pins.push({ r: line.blocker.r, f: line.blocker.f, piece: line.blocker.piece });
+        }
+      }
+    }
+    return pins;
+  }
+
+  // Pin bait — added 2026-09-21, last of the three motifs planned this
+  // session. Mirrors review.py's
+  // find_motifs() pin case (only absolute pins — pinned to the king, same
+  // limitation review.py itself carries, python-chess has no native concept
+  // of a relative pin either): a move is a pin if some victim piece is
+  // pinned afterward that wasn't pinned before. Computed as a real
+  // before/after set difference over the WHOLE board's pins (pinnedSquares
+  // above), same shape as review.py's own set-difference check,
+  // rather than a move-specific heuristic — deliberately, so an
+  // already-existing pin that an unrelated move leaves untouched is never
+  // reported as newly created.
+  function findPin(game, ownerColor) {
+    var mover = ownerColor === "w" ? "b" : "w";
+    if (game.turn() !== mover) return null;
+    var beforeKeys = {};
+    pinnedSquares(game.board(), mover, ownerColor).forEach(function (p) { beforeKeys[rfSquare(p.r, p.f)] = true; });
+    var candidateMoves = game.moves({ verbose: true });
+    for (var i = 0; i < candidateMoves.length; i++) {
+      var m = candidateMoves[i];
+      game.move(m);
+      var found = null;
+      if (!game.game_over()) {
+        var newOnes = pinnedSquares(game.board(), mover, ownerColor).filter(function (p) { return !beforeKeys[rfSquare(p.r, p.f)]; });
+        if (newOnes.length) {
+          newOnes.sort(function (a, b) { return PIECE_VALUE[b.piece.type] - PIECE_VALUE[a.piece.type]; });
+          var victim = newOnes[0];
+          found = { square: rfSquare(victim.r, victim.f), piece: victim.piece.type, value: PIECE_VALUE[victim.piece.type], via: m.san, viaFrom: m.from, viaTo: m.to };
+        }
+      }
+      game.undo();
+      if (found) return found;
+    }
+    return null;
+  }
+
+  function terminalScore(game, botColor) {
+    if (game.in_checkmate()) {
+      // side to move is checkmated
+      return game.turn() === botColor ? -100000 : 100000;
+    }
+    return 0; // stalemate / draw
+  }
+
+  // Caps the branching factor on both the bot's own candidate moves and the
+  // opponent's reply search: every capture (that's where the tactics live)
+  // plus a random sample of quiet moves up to the cap, so worst-case cost
+  // stays bounded regardless of how open the position is. Measured against
+  // real chess.js under JavaScriptCore before shipping: the uncapped, full O(candidates x replies) version with a
+  // bait check on every candidate ran 300ms-2.3s per move, spiking in open
+  // middlegame positions. Capping both lists and only bait-checking the
+  // near-best pool (not every candidate) brought that down meaningfully;
+  // real browsers (V8) should run faster still than the command-line
+  // JavaScriptCore interpreter this was measured on. Both caps and the
+  // tolerance/noise below come from activeTuning() — normally TUNING (keyed
+  // to the user's current rating band, scripts/build.py), but live-swappable
+  // via the Opponent Rating dropdown, which is why these read the active
+  // band fresh on every call instead of being cached once at load time.
+  function boundedMoves(list, cap) {
+    if (list.length <= cap) return list;
+    var captures = list.filter(function (m) { return m.captured; });
+    var quiet = list.filter(function (m) { return !m.captured; });
+    for (var i = quiet.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = quiet[i]; quiet[i] = quiet[j]; quiet[j] = t;
+    }
+    return captures.concat(quiet).slice(0, cap);
+  }
+
+  // Search, rewritten 2026-09-24 (the user: "only searches two moves ahead,
+  // conservative about any tactic that involves a trade"). The old score was
+  // a flat 2-ply: apply the candidate, take the worst static eval after any
+  // one reply. A static eval taken mid-exchange is the classic horizon
+  // problem: a trade that starts with the bot's capture and ends two
+  // captures later looked like "lost a piece" (or a free win) depending on
+  // where the search happened to stop, so the bot shied away from trades
+  // and mis-valued them both ways. Two fixes, both standard:
+  //   1. Quiescence: at the search horizon, keep playing captures (and
+  //      promotions) until the position is quiet, with a "stand pat" floor
+  //      so a side is never forced into a losing capture. This alone
+  //      resolves trade sequences.
+  //   2. Alpha-beta negamax to `tuning.depth` plies (candidate move
+  //      included), with captures ordered first (most valuable victim,
+  //      cheapest attacker) so cutoffs actually happen.
+  // Branching is still capped and sampled per boundedMoves (captures always
+  // kept, quiet moves sampled), and every candidate gets a node budget, so
+  // cost stays bounded in open positions. Past the budget a node just
+  // returns its static eval, which degrades strength, never legality.
+  // `tuning.depth` is a band knob (build.py ELO_BANDS): weaker bands search
+  // shallower, so the depth increase doesn't also make a 300-rated
+  // opponent play like a 900.
+  var MATE = 100000;
+  var NODE_BUDGET = 500;
+  var QUIESCE_DEPTH = 4;
+  var DEEP_K = 5;
+
+  function orderKey(m) {
+    return (m.captured ? 10000 + PIECE_VALUE[m.captured] * 10 - PIECE_VALUE[m.piece] : 0) + (m.promotion ? 800 : 0);
+  }
+
+  // Static eval from the point of view of the side to move.
+  function evalSide(game) { return evalPosition(game, game.turn()); }
+
+  function quiesce(game, alpha, beta, ctx, qd, moves) {
+    ctx.nodes++;
+    var stand = evalSide(game);
+    if (qd <= 0 || ctx.nodes > ctx.budget) return stand;
+    if (stand >= beta) return stand;
+    if (stand > alpha) alpha = stand;
+    var list = (moves || game.moves({ verbose: true })).filter(function (m) { return m.captured || m.promotion; });
+    list.sort(function (a, b) { return orderKey(b) - orderKey(a); });
+    for (var i = 0; i < list.length; i++) {
+      var m = list[i];
+      // Delta pruning: a capture that can't lift the score to alpha even
+      // with a generous margin isn't worth searching.
+      if (!m.promotion && stand + PIECE_VALUE[m.captured] + 200 < alpha) continue;
+      game.move(m);
+      var v = -quiesce(game, -beta, -alpha, ctx, qd - 1, null);
+      game.undo();
+      if (v >= beta) return v;
+      if (v > alpha) alpha = v;
+    }
+    return alpha;
+  }
+
+  // `lastCapture` = the move that led here was a capture. Only those leaves
+  // get the quiescence extension: legal-move generation in chess.js is the
+  // expensive part of this whole search, and a leaf reached by a quiet move
+  // has no capture sequence in flight to resolve. (First version extended
+  // every leaf: 2.3s/move on average at depth 2, versus 0.28s for the old
+  // flat 2-ply. Trades are captures answered by captures, so gating on the
+  // last move keeps them resolved at a fraction of the cost.)
+  function negamax(game, depth, alpha, beta, ply, ctx, tuning, lastCapture) {
+    ctx.nodes++;
+    if (depth <= 0 || ctx.nodes > ctx.budget) {
+      return lastCapture ? quiesce(game, alpha, beta, ctx, QUIESCE_DEPTH, null) : evalSide(game);
+    }
+    var moves = game.moves({ verbose: true });
+    if (!moves.length) return game.in_check() ? -(MATE - ply) : 0;
+    var list = boundedMoves(moves, ply <= 1 ? tuning.replyCap : Math.max(5, tuning.replyCap - 4));
+    list.sort(function (a, b) { return orderKey(b) - orderKey(a); });
+    var best = -Infinity;
+    for (var i = 0; i < list.length; i++) {
+      game.move(list[i]);
+      var v = -negamax(game, depth - 1, -beta, -alpha, ply + 1, ctx, tuning, !!list[i].captured);
+      game.undo();
+      if (v > best) best = v;
+      if (v > alpha) alpha = v;
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+
+  // Score of one candidate move for the bot, from the bot's point of view.
+  // `withNoise` keeps ordinary move choice from feeling robotic; the punish
+  // pass below scores WITHOUT noise, since it's a soundness check, not a
+  // move choice.
+  function scoreCandidate(game, mv, botColor, tuning, withNoise, depth) {
+    game.move(mv);
+    var s;
+    if (game.game_over()) {
+      s = terminalScore(game, botColor);
+    } else {
+      var ctx = { nodes: 0, budget: NODE_BUDGET };
+      s = -negamax(game, (depth || tuning.depth || 2) - 1, -Infinity, Infinity, 1, ctx, tuning, !!mv.captured);
+      if (withNoise) s += Math.random() * tuning.noise * 2 - tuning.noise;
+    }
+    game.undo();
+    return s;
+  }
+
+  // Punish pass — the bot's other job, added 2026-09-24 (the user: "it needs to
+  // punish me whenever I make one of these patterns myself"). Until then the
+  // bot only baited; it captured a hung piece only because its 2-ply
+  // material eval happens to see the gain, and it played forks/pins/
+  // discovered attacks against you at roughly chance level (measured: fork
+  // 7 of 40, pin 2 of 40, discovered attack 0 of 40 in positions where one
+  // was available). The find*() detectors were written from the point of
+  // view "the side to move has this tactic against ownerColor", so they
+  // work unchanged with the bot to move and YOU as ownerColor. Each
+  // detector's move is accepted only if it's sound by the bot's own 2-ply
+  // score (within PUNISH_TOLERANCE of the best move found), so a tactic that
+  // hangs the bot's queen isn't played just because it's a fork. Highest
+  // victim value wins. Known limit: each detector reports one move, so if
+  // that one fails the soundness check, a second, sounder move of the same
+  // pattern isn't tried.
+  var PUNISH_TOLERANCE = 100;
+  var PUNISH_CHECKS = [
+    ["hung_material", findHangingPiece],
+    ["discovered_attack", findDiscoveredAttack],
+    ["fork", findFork],
+    ["pin", findPin]
+  ];
+  // Data-driven ordering (2026-09-24): WEAKNESS.allowed holds how often each
+  // pattern was left available to an opponent in your real blunders (the
+  // opponent's best reply, not what you missed). Highest allowed rate is
+  // tried first, and wins ties on victim value below. Falls back to the
+  // fixed order above if the data isn't there.
+  (function orderPunishChecks() {
+    var al = WEAKNESS.allowed;
+    if (!al) return;
+    var rate = function (k) { return al[k] ? al[k].pct : 0; };
+    PUNISH_CHECKS.sort(function (a, b) { return rate(b[0]) - rate(a[0]); });
+  })();
+  function allowedRate(type) {
+    return WEAKNESS.allowed && WEAKNESS.allowed[type] ? WEAKNESS.allowed[type].pct : 0;
+  }
+  function findPunish(game, botColor, bestScore, tuning) {
+    var humanColor = botColor === "w" ? "b" : "w";
+    if (game.turn() !== botColor) return null;
+    var legal = game.moves({ verbose: true }), found = null;
+    for (var c = 0; c < PUNISH_CHECKS.length; c++) {
+      var r = PUNISH_CHECKS[c][1](game, humanColor);
+      if (!r || !r.viaFrom) continue;
+      var mv = null;
+      for (var i = 0; i < legal.length; i++) {
+        if (legal[i].from === r.viaFrom && legal[i].to === r.viaTo) { mv = legal[i]; break; }
+      }
+      if (!mv) continue;
+      if (scoreCandidate(game, mv, botColor, tuning, false) < bestScore - PUNISH_TOLERANCE) continue;
+      if (!found || r.value > found.value || (r.value === found.value && allowedRate(PUNISH_CHECKS[c][0]) > allowedRate(found.type))) found = { type: PUNISH_CHECKS[c][0], mv: mv, value: r.value, piece: r.piece, square: r.square };
+    }
+    return found;
+  }
+
+  // Bait priority from YOUR data (2026-09-24; it used to be a fixed order,
+  // hung material > discovered attack > fork > pin, frozen at the
+  // frequencies measured on 2026-09-21). WEAKNESS.patterns carries each
+  // pattern's share of your flagged blunders from the latest batch. The
+  // order the bait checks run in is drawn at random, each pattern with
+  // probability proportional to its share (weighted sampling without
+  // replacement), and the first check that finds a bait in the near-best
+  // pool wins. Common patterns usually come first, rare ones still get
+  // their turn, and average cost stays low since the pricey checks often
+  // don't run. (Punishing is ordered separately, by WEAKNESS.allowed.)
+  function patternPct(id) {
+    var ps = WEAKNESS.patterns || [];
+    for (var i = 0; i < ps.length; i++) if (ps[i].id === id) return Math.max(ps[i].pct || 0, 0.5);
+    return 1;
+  }
+  function weightedOrder(checks) {
+    return checks.map(function (c) { return { c: c, k: Math.pow(Math.random(), 1 / patternPct(c[0])) }; })
+      .sort(function (a, b) { return b.k - a.k; })
+      .map(function (x) { return x.c; });
+  }
+
+  function computeBotMove() {
+    var game = state.game, botColor = state.botColor;
+    var tuning = activeTuning();
+    var candidates = boundedMoves(game.moves({ verbose: true }), tuning.candidateCap);
+    if (!candidates.length) return null;
+    // Two stages. Every candidate gets the cheap depth-2 score (plus the
+    // capture extension); only the top DEEP_K by that score are searched at
+    // the band's full depth. A flat depth-3 pass over all candidates ran
+    // several seconds a move in chess.js, so depth is spent where it can
+    // change the decision. Candidates that fall out after stage one don't
+    // reach the pool, since their shallow scores aren't comparable with the
+    // deep ones.
+    var scored = candidates.map(function (mv) {
+      return { mv: mv, score: scoreCandidate(game, mv, botColor, tuning, true, 2) };
+    });
+    scored.sort(function (a, b) { return b.score - a.score; });
+    if ((tuning.depth || 2) > 2) {
+      scored = scored.slice(0, DEEP_K).map(function (c) {
+        return { mv: c.mv, score: scoreCandidate(game, c.mv, botColor, tuning, true) };
+      });
+      scored.sort(function (a, b) { return b.score - a.score; });
+    }
+    var best = scored[0].score;
+    var punish = findPunish(game, botColor, best, tuning);
+    if (punish) return { mv: punish.mv, score: best, punish: { type: punish.type, piece: punish.piece, square: punish.square } };
+    var TOLERANCE = tuning.tolerance;
+    var pool = scored.filter(function (c) { return c.score >= best - TOLERANCE; });
+    // Only the near-best pool gets the (relatively expensive) bait check —
+    // scoring every candidate for hanging pieces was most of the cost above.
+    // Checks run one after another across the SAME pool, in a data-weighted
+    // random order (weightedOrder above), stopping at the first that finds
+    // a bait: each check is real per-candidate work and shouldn't all run
+    // on every move.
+    var BAIT_CHECKS = [
+      ["hung_material", findHangingPiece],
+      ["discovered_attack", findDiscoveredAttack],
+      ["fork", findFork],
+      ["pin", findPin]
+    ];
+    var pick = null;
+    var checks = weightedOrder(BAIT_CHECKS);
+    for (var c = 0; c < checks.length && !pick; c++) {
+      var type = checks[c][0], checkFn = checks[c][1];
+      var baiting = [];
+      for (var p = 0; p < pool.length; p++) {
+        game.move(pool[p].mv);
+        var b = game.game_over() ? null : checkFn(game, botColor);
+        game.undo();
+        if (b) { pool[p].bait = { type: type, square: b.square, piece: b.piece, value: b.value, via: b.via, viaFrom: b.viaFrom, viaTo: b.viaTo }; baiting.push(pool[p]); }
+      }
+      if (baiting.length) pick = baiting[0];
+    }
+    return pick || pool[0];
+  }
+
+  // ---- session history (db capability) ----
+  // Added 2026-09-24. Every finished practice game and every review-mode
+  // attempt run is saved as one document in this page's own storage
+  // ("sessions" collection) — deliberately NOT the ledger data
+  // or any batch data, so practice results never mix into your real blunder
+  // stats. The page works fine without it: DB stays null when this view
+  // can't run db, and History just says so.
+  var DB = null, HISTORY = null, DB_STATE = "loading";
+
+  function rate(taken, offered) { return offered ? Math.round(100 * taken / offered) : null; }
+
+  function sumBait(byType) {
+    var o = 0, t = 0;
+    Object.keys(byType || {}).forEach(function (k) { o += byType[k].offered || 0; t += byType[k].taken || 0; });
+    return { offered: o, taken: t };
+  }
+
+  // Pure (no DOM, no db) so it can be tested headlessly. `docs` is newest first.
+  function summarizeHistory(docs) {
+    var games = docs.filter(function (d) { return d.mode === "game"; });
+    var reviews = docs.filter(function (d) { return d.mode === "review"; });
+    var totals = { offered: 0, taken: 0 }, byType = {}, record = { w: 0, l: 0, d: 0 };
+    games.forEach(function (g) {
+      var s = sumBait(g.byType);
+      totals.offered += s.offered; totals.taken += s.taken;
+      Object.keys(g.byType || {}).forEach(function (k) {
+        byType[k] = byType[k] || { offered: 0, taken: 0 };
+        byType[k].offered += g.byType[k].offered || 0;
+        byType[k].taken += g.byType[k].taken || 0;
+      });
+      if (g.result === "win") record.w++; else if (g.result === "loss") record.l++; else if (g.result === "draw") record.d++;
+    });
+    function windowRate(list) {
+      var o = 0, t = 0;
+      list.forEach(function (g) { var s = sumBait(g.byType); o += s.offered; t += s.taken; });
+      return rate(t, o);
+    }
+    var recent = games.slice(0, 5), earlier = games.slice(5, 10);
+    var punished = 0;
+    games.forEach(function (g) { Object.keys(g.punished || {}).forEach(function (k) { punished += g.punished[k] || 0; }); });
+    var rv = { attempted: 0, correct: 0 };
+    reviews.forEach(function (r) { rv.attempted += r.attempted || 0; rv.correct += r.correct || 0; });
+    return {
+      games: games.length, record: record, overall: rate(totals.taken, totals.offered), totals: totals,
+      recent: recent.length >= 3 ? windowRate(recent) : null,
+      earlier: earlier.length >= 3 ? windowRate(earlier) : null,
+      byType: byType, punished: punished, review: rv, reviewSessions: reviews.length
+    };
+  }
+
+  var TYPE_LABEL = { hung_material: "hung material", discovered_attack: "discovered attack", fork: "fork", pin: "pin" };
+
+  function renderHistory() {
+    var el = document.getElementById("historyBody");
+    if (!el) return;
+    if (DB_STATE === "unavailable") { el.textContent = "Session history isn't available in this view (storage didn't connect)."; return; }
+    if (!HISTORY) { el.textContent = "Session history loads once storage connects."; return; }
+    var s = summarizeHistory(HISTORY);
+    if (!s.games && !s.reviewSessions) { el.textContent = "No saved sessions yet. Finish a game or answer a review puzzle and it'll show up here."; return; }
+    var lines = [];
+    if (s.games) {
+      lines.push(s.games + " game" + (s.games === 1 ? "" : "s") + " saved &middot; " + s.record.w + "W-" + s.record.l + "L-" + s.record.d + "D");
+      lines.push("Bait taken: " + (s.overall === null ? "n/a" : s.overall + "%") + " (" + s.totals.taken + " of " + s.totals.offered + ")");
+      if (s.recent !== null && s.earlier !== null) {
+        var diff = s.recent - s.earlier;
+        lines.push("Last 5 games: " + s.recent + "% vs. the 5 before: " + s.earlier + "% (" + (diff > 0 ? "+" : "") + diff + " pts)");
+      }
+      var per = Object.keys(s.byType).filter(function (k) { return s.byType[k].offered; }).map(function (k) {
+        return (TYPE_LABEL[k] || k) + " " + rate(s.byType[k].taken, s.byType[k].offered) + "%";
+      });
+      if (per.length) lines.push("By pattern: " + per.join(", "));
+      lines.push("Times the bot punished you: " + s.punished + (s.games ? " (" + (s.punished / s.games).toFixed(1) + " per game)" : ""));
+    }
+    if (s.reviewSessions) lines.push("Review: " + s.review.correct + " of " + s.review.attempted + " puzzles solved across " + s.reviewSessions + " run" + (s.reviewSessions === 1 ? "" : "s"));
+    el.innerHTML = lines.join("<br>");
+  }
+
+  function refreshHistory() {
+    if (!DB) return Promise.resolve();
+    return DB.collection("sessions").orderBy("ts", "desc").limit(60).get().then(function (snap) {
+      HISTORY = snap.docs.map(function (d) { return d.data(); });
+      renderHistory();
+    }, function () {});
+  }
+
+
+  // Storage: the hosting page can provide a db (window.claude); otherwise a
+  // small localStorage-backed stand-in with the same surface (collection ->
+  // orderBy/limit/get, add, doc().set) keeps History working on a plain
+  // static page such as GitHub Pages. Everything stays in this browser.
+  function localDb() {
+    var KEY = "blunder-bait-sessions";
+    function load() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } }
+    function save(list) { try { localStorage.setItem(KEY, JSON.stringify(list.slice(-200))); } catch (e) {} }
+    return {
+      collection: function () {
+        return {
+          orderBy: function () { return this; },
+          limit: function (n) { this._n = n; return this; },
+          get: function () {
+            var docs = load().sort(function (a, b) { return b.ts - a.ts; }).slice(0, this._n || 60);
+            return Promise.resolve({ docs: docs.map(function (d) { return { data: function () { return d; } }; }) });
+          },
+          add: function (doc) { var l = load(); l.push(doc); save(l); return Promise.resolve(); },
+          doc: function () {
+            return { set: function (doc) {
+              var l = load().filter(function (d) { return d.ts !== doc.ts; }); l.push(doc); save(l); return Promise.resolve();
+            } };
+          }
+        };
+      }
+    };
+  }
+
+  function initDb() {
+    try {
+      if (!window.claude || !window.claude.use) {
+        try { localStorage.setItem("blunder-bait-probe", "1"); localStorage.removeItem("blunder-bait-probe"); DB = localDb(); DB_STATE = "ready"; refreshHistory(); }
+        catch (e) { DB_STATE = "unavailable"; renderHistory(); }
+        return;
+      }
+      window.claude.use("db").then(function (db) {
+        if (!db) { DB_STATE = "unavailable"; renderHistory(); return; }
+        DB = db; DB_STATE = "ready"; refreshHistory();
+      }, function () { DB_STATE = "unavailable"; renderHistory(); });
+    } catch (e) { DB_STATE = "unavailable"; renderHistory(); }
+  }
+
+  function bumpBait(type, field) {
+    if (!state.bait[type]) state.bait[type] = { offered: 0, taken: 0 };
+    state.bait[type][field]++;
+  }
+
+  function bumpPunish(type) { state.punish[type] = (state.punish[type] || 0) + 1; }
+
+  function logGame(result) {
+    if (state.logged || !DB || !state.history.length) return;
+    state.logged = true;
+    var t = activeTuning();
+    var doc = {
+      ts: Date.now(), mode: "game", result: result, plies: state.history.length,
+      humanColor: state.humanColor,
+      band: state.ratingChoice === "auto" ? (t.label + " (auto)") : (t.label + " (manual)"),
+      byType: JSON.parse(JSON.stringify(state.bait)),
+      punished: JSON.parse(JSON.stringify(state.punish))
+    };
+    DB.collection("sessions").add(doc).then(refreshHistory, function () {});
+  }
+
+  // One document per review run, rewritten in full after each answer
+  // (awaited in order via a chain, since only one write to a document may be
+  // in flight at a time). Created lazily on the first answer, never on load.
+  function logReviewAnswer() {
+    var r = state.review;
+    if (!DB) return;
+    if (!r.ref) { r.sessionTs = Date.now(); r.ref = DB.collection("sessions").doc(); r.writeChain = Promise.resolve(); }
+    var doc = { ts: r.sessionTs, mode: "review", attempted: r.attempted, correct: r.correct, rounds: r.round || 1, redoSolved: r.redoSolved || 0 };
+    r.writeChain = r.writeChain.then(function () { return r.ref.set(doc); }).then(refreshHistory, function () {});
+  }
+
+  // ---- game flow ----
+  function startGame(color) {
+    state.game = new Chess();
+    state.humanColor = color;
+    state.botColor = color === "w" ? "b" : "w";
+    state.screen = "playing";
+    state.selected = null; state.legalTargets = [];
+    state.history = []; state.lastMove = null; state.lastBait = null; state.bait = {}; state.punish = {}; state.lastPunish = null; state.logged = false;
+    state.baitOffered = 0; state.baitTaken = 0;
+    state.over = false; state.overText = "";
+    render();
+    if (state.botColor === "w") scheduleBotMove();
+  }
+
+  function selectSquare(sq) {
+    state.selected = sq;
+    var moves = state.game.moves({ square: sq, verbose: true });
+    var byTo = {};
+    moves.forEach(function (m) {
+      if (!byTo[m.to]) byTo[m.to] = { to: m.to, capture: !!m.captured, promotion: false };
+      if (m.flags.indexOf("p") !== -1) byTo[m.to].promotion = true;
+    });
+    state.legalTargets = Object.keys(byTo).map(function (k) { return byTo[k]; });
+    render();
+  }
+
+  function onSquareClick(sq) {
+    if (state.screen !== "playing" || state.thinking || state.over) return;
+    if (state.game.turn() !== state.humanColor) return;
+    var piece = state.game.get(sq);
+    if (state.selected) {
+      if (state.selected === sq) { state.selected = null; state.legalTargets = []; render(); return; }
+      var target = state.legalTargets.filter(function (t) { return t.to === sq; })[0];
+      if (target) {
+        if (target.promotion) {
+          state.pendingPromotion = { from: state.selected, to: sq };
+          render();
+          return;
+        }
+        applyHumanMove(state.selected, sq, null);
+        return;
+      }
+      if (piece && piece.color === state.humanColor) { selectSquare(sq); return; }
+      state.selected = null; state.legalTargets = []; render();
+      return;
+    }
+    if (piece && piece.color === state.humanColor) selectSquare(sq);
+  }
+
+  // What counts as "taking" a bait differs by type: hung material is taken
+  // by capturing the hanging piece outright, same move. Every other type
+  // (discovered attack, fork, and pin once it exists) is taken by playing
+  // the SPECIFIC move that creates the tactic (see each find*() function's
+  // via/viaFrom/viaTo) — that move itself doesn't capture anything yet, the
+  // material payoff comes later, so it can't be checked the same way.
+  function baitWasTaken(bait, mv) {
+    if (!bait) return false;
+    if (bait.type === "hung_material") return mv.to === bait.square && !!mv.captured;
+    return mv.from === bait.viaFrom && mv.to === bait.viaTo;
+  }
+
+  function applyHumanMove(from, to, promotion) {
+    var mv = state.game.move({ from: from, to: to, promotion: promotion || "q" });
+    if (!mv) return;
+    if (state.lastBait && baitWasTaken(state.lastBait, mv)) {
+      state.baitTaken++;
+      bumpBait(state.lastBait.type, "taken");
+      markBaitResolution("taken");
+    } else if (state.lastBait) {
+      markBaitResolution("missed");
+    }
+    state.lastBait = null;
+    state.selected = null; state.legalTargets = []; state.pendingPromotion = null;
+    state.lastMove = { from: from, to: to };
+    state.history.push({ san: mv.san, color: mv.color, bait: null });
+    checkGameOver();
+    render();
+    if (!state.over) scheduleBotMove();
+  }
+
+  function markBaitResolution(result) {
+    for (var i = state.history.length - 1; i >= 0; i--) {
+      if (state.history[i].color === state.botColor) { state.history[i].bait = result; break; }
+    }
+  }
+
+  function scheduleBotMove() {
+    state.thinking = true; render();
+    setTimeout(function () {
+      var pick = computeBotMove();
+      if (!pick) { state.thinking = false; render(); return; }
+      var mv = state.game.move(pick.mv);
+      state.lastMove = { from: mv.from, to: mv.to };
+      state.history.push({ san: mv.san, color: mv.color, bait: null });
+      // Reuse pick.bait (computed while scoring candidates, same resulting
+      // position) instead of re-running the bait check after the fact —
+      // avoids a second, redundant pass of the more expensive
+      // findDiscoveredAttack check.
+      state.lastPunish = pick.punish || null;
+      if (pick.punish) bumpPunish(pick.punish.type);
+      state.lastBait = (!state.game.game_over() && pick.bait) ? pick.bait : null;
+      if (state.lastBait) { state.baitOffered++; bumpBait(state.lastBait.type, "offered"); }
+      state.thinking = false;
+      checkGameOver();
+      render();
+    }, 380);
+  }
+
+  function checkGameOver() {
+    var g = state.game;
+    if (!g.game_over()) return;
+    state.over = true;
+    var result = "draw";
+    if (g.in_checkmate()) {
+      var winner = g.turn() === state.humanColor ? "Bot" : "You";
+      state.overText = (winner === "You" ? "Checkmate — you win." : "Checkmate — the bot wins.");
+      result = winner === "You" ? "win" : "loss";
+    } else if (g.in_stalemate()) state.overText = "Stalemate.";
+    else if (g.in_threefold_repetition()) state.overText = "Draw by repetition.";
+    else if (g.insufficient_material()) state.overText = "Draw — insufficient material.";
+    else state.overText = "Draw.";
+    logGame(result);
+  }
+
+  // ---- rendering ----
+  function pieceIconSvg(color, type, size) {
+    size = size || 16;
+    var fill = color === "w" ? "var(--board-piece-white)" : "var(--board-piece-black)";
+    var stroke = color === "w" ? "var(--board-piece-white-stroke)" : "var(--board-piece-black-stroke)";
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 20 20"><text x="10" y="15" text-anchor="middle" font-size="16" fill="' + fill + '" stroke="' + stroke + '" stroke-width="0.6" paint-order="stroke fill">' + PIECE_GLYPH[type] + "</text></svg>";
+  }
+
+  function renderMaterialBar(color) {
+    if (!state.game) return "";
+    var board = state.game.board();
+    var counts = { w: { p:0,n:0,b:0,r:0,q:0 }, b: { p:0,n:0,b:0,r:0,q:0 } };
+    for (var r = 0; r < 8; r++) for (var f = 0; f < 8; f++) {
+      var p = board[r][f];
+      if (p && p.type !== "k") counts[p.color][p.type]++;
+    }
+    var start = { p:8,n:2,b:2,r:2,q:1 };
+    var opp = color === "w" ? "b" : "w";
+    var captured = [];
+    ["q","r","b","n","p"].forEach(function (t) {
+      var n = start[t] - counts[opp][t];
+      for (var i = 0; i < n; i++) captured.push(t);
+    });
+    var myVal = 0, oppVal = 0;
+    Object.keys(counts.w).forEach(function (t) { myVal += (color === "w" ? counts.w[t] : counts.b[t]) * PIECE_VALUE[t]; });
+    Object.keys(counts.b).forEach(function (t) { oppVal += (color === "w" ? counts.b[t] : counts.w[t]) * PIECE_VALUE[t]; });
+    var diff = Math.round((myVal - oppVal) / 100);
+    var icons = captured.map(function (t) { return pieceIconSvg(opp, t, 14); }).join("");
+    return icons + (diff > 0 ? '<span class="mat">+' + diff + "</span>" : "");
+  }
+
+  function renderBars() {
+    if (state.screen !== "playing" && !state.game) {
+      document.getElementById("barTop").innerHTML = '<span class="name">Bot</span><span></span>';
+      document.getElementById("barBottom").innerHTML = '<span class="name">You</span><span></span>';
+      return;
+    }
+    var human = state.humanColor || "w", bot = state.botColor || "b";
+    document.getElementById("barTop").innerHTML = '<span><span class="name">Bot</span> &middot; ' + (bot === "w" ? "White" : "Black") + "</span><span>" + renderMaterialBar(bot) + "</span>";
+    document.getElementById("barBottom").innerHTML = '<span><span class="name">You</span> &middot; ' + (human === "w" ? "White" : "Black") + "</span><span>" + renderMaterialBar(human) + "</span>";
+  }
+
+  // Generic board painter, parametrized so both the practice board and the
+  // review-mode puzzle board (same visual language, different underlying
+  // game/state) share one implementation instead of two copies to keep in
+  // sync. `opts.clickable` gates the cursor/hit-testing class only — actual
+  // click handling is wired separately per board (onSquareClick vs.
+  // onReviewSquareClick), since what a click *means* differs between them.
+  function renderBoardInto(svgId, game, opts) {
+    opts = opts || {};
+    var svg = document.getElementById(svgId);
+    var S = 50;
+    var flip = !!opts.flip;
+    var board = game ? game.board() : new Chess().board();
+    var legalMap = {};
+    (opts.legalTargets || []).forEach(function (t) { legalMap[t.to] = t; });
+    var selected = opts.selected, lastMove = opts.lastMove, clickable = opts.clickable;
+    var html = "";
+    for (var r = 0; r < 8; r++) {
+      for (var f = 0; f < 8; f++) {
+        var dispR = flip ? 7 - r : r, dispF = flip ? 7 - f : f;
+        var light = (r + f) % 2 === 0;
+        var sq = rfSquare(r, f);
+        var x = dispF * S, y = dispR * S;
+        var isSel = selected === sq;
+        var isLast = lastMove && (lastMove.from === sq || lastMove.to === sq);
+        var fillColor = light ? "var(--board-light)" : "var(--board-dark)";
+        html += '<g class="sq' + (clickable ? " clickable" : "") + '" data-square="' + sq + '">';
+        html += '<rect x="' + x + '" y="' + y + '" width="' + S + '" height="' + S + '" fill="' + fillColor + '"/>';
+        if (isLast) html += '<rect x="' + x + '" y="' + y + '" width="' + S + '" height="' + S + '" fill="var(--board-hl)" opacity="0.3"/>';
+        if (isSel) html += '<rect x="' + x + '" y="' + y + '" width="' + S + '" height="' + S + '" fill="none" stroke="var(--board-hl)" stroke-width="2.5"/>';
+        if (dispF === 0) html += '<text x="' + (x + 4) + '" y="' + (y + 12) + '" font-size="9" font-weight="700" fill="#fff" font-family="var(--font-body)" opacity="0.6">' + (8 - r) + "</text>";
+        if (dispR === 7) html += '<text x="' + (x + S - 4) + '" y="' + (y + S - 4) + '" text-anchor="end" font-size="9" font-weight="700" fill="#fff" font-family="var(--font-body)" opacity="0.6">' + String.fromCharCode(97 + f) + "</text>";
+        var piece = board[r][f];
+        if (piece) {
+          var isWhite = piece.color === "w";
+          html += '<text class="sq-piece" x="' + (x + S / 2) + '" y="' + (y + S / 2 + 12) + '" text-anchor="middle" fill="' + (isWhite ? "var(--board-piece-white)" : "var(--board-piece-black)") + '" stroke="' + (isWhite ? "var(--board-piece-white-stroke)" : "var(--board-piece-black-stroke)") + '" stroke-width="' + (isWhite ? 1.3 : 0.9) + '" paint-order="stroke fill">' + PIECE_GLYPH[piece.type] + "</text>";
+        }
+        var lt = legalMap[sq];
+        if (lt) {
+          if (lt.capture) html += '<circle cx="' + (x + S / 2) + '" cy="' + (y + S / 2) + '" r="' + (S / 2 - 3) + '" fill="none" stroke="var(--status-good)" stroke-width="3" opacity="0.85"/>';
+          else html += '<circle cx="' + (x + S / 2) + '" cy="' + (y + S / 2) + '" r="6" fill="var(--status-good)" opacity="0.75"/>';
+        }
+        html += "</g>";
+      }
+    }
+    svg.innerHTML = html;
+  }
+
+  function renderBoard() {
+    renderBoardInto("boardSvg", state.game, {
+      flip: state.humanColor === "b",
+      legalTargets: state.legalTargets,
+      selected: state.selected,
+      lastMove: state.lastMove,
+      clickable: state.screen === "playing"
+    });
+  }
+
+  function renderStatus() {
+    var el = document.getElementById("statusLine");
+    var txt = document.getElementById("statusText");
+    el.classList.remove("thinking", "danger");
+    if (state.screen === "setup") { txt.textContent = "Choose a side to begin."; return; }
+    if (state.over) { txt.textContent = "Game over — see below."; return; }
+    if (state.thinking) { el.classList.add("thinking"); txt.textContent = "Bot is thinking…"; return; }
+    var inCheck = state.game.in_check();
+    if (inCheck) el.classList.add("danger");
+    var note = "";
+    if (state.lastPunish) {
+      var lbl = { hung_material: "a hanging piece", discovered_attack: "a discovered attack", fork: "a fork", pin: "a pin" }[state.lastPunish.type] || "a mistake";
+      note = " The bot just punished you for allowing " + lbl + ".";
+    }
+    txt.textContent = (inCheck ? "Check — " : "") + "Your move." + note;
+  }
+
+  function renderMoveList() {
+    var el = document.getElementById("moveList");
+    if (!state.history.length) { el.innerHTML = '<span class="empty">No moves yet.</span>'; return; }
+    var rows = [];
+    for (var i = 0; i < state.history.length; i += 2) {
+      var num = i / 2 + 1;
+      var w = state.history[i], b = state.history[i + 1];
+      var wDot = w && w.bait ? '<span class="bait-dot ' + w.bait + '"></span>' : "";
+      var bDot = b && b.bait ? '<span class="bait-dot ' + b.bait + '"></span>' : "";
+      rows.push('<div class="movelist-row"><span class="num">' + num + ".</span><span class=\"san\">" + (w ? w.san + wDot : "") + "</span><span class=\"san\">" + (b ? b.san + bDot : "") + "</span></div>");
+    }
+    el.innerHTML = rows.reverse().join("");
+  }
+
+  function renderPromo() {
+    var modal = document.getElementById("promoModal");
+    if (!state.pendingPromotion) { modal.hidden = true; return; }
+    modal.hidden = false;
+    var color = state.humanColor;
+    var pieces = ["q", "r", "b", "n"];
+    document.getElementById("promoInner").innerHTML = pieces.map(function (t) {
+      return '<button data-promo="' + t + '" title="' + PIECE_NAME[t] + '">' + PIECE_GLYPH[t] + "</button>";
+    }).join("");
+  }
+
+  function renderBadges() {
+    var tuning = activeTuning();
+    var levelLabel = state.ratingChoice === "auto"
+      ? '<b>~' + TUNING.eloValue + '</b> (' + TUNING.label + ')'
+      : '<b>' + tuning.label + '</b> (manual)';
+    var patternNames = (WEAKNESS.patterns || []).map(function (p) { return p.name; }).join(" + ") || "hung material";
+    var html = '<span class="badge">Bot level: ' + levelLabel + '</span>';
+    html += '<span class="badge">Targeting: <b>' + patternNames + '</b></span>';
+    html += '<span class="badge">' + WEAKNESS.count + ' of ' + WEAKNESS.total + ' blunders (' + WEAKNESS.pct + '%) — ' + WEAKNESS.source + '</span>';
+    if (!WEAKNESS.dominant) {
+      html += '<span class="badge warn">Note: hung material may no longer be your single largest pattern</span>';
+    }
+    document.getElementById("weaknessBadges").innerHTML = html;
+  }
+
+  function renderHowItWorks() {
+    var patterns = WEAKNESS.patterns || [];
+    var weaknessLine = "Data comes from the same batch bulk_review.py itself uses (" + WEAKNESS.source + "), against " + WEAKNESS.total + " flagged blunders: " +
+      patterns.map(function (p) { return p.count + " (" + p.pct + "%) classified as " + p.name; }).join("; ") + ".";
+    var engineLine = "The bot itself isn't Stockfish — it's a small alpha-beta search (two moves ahead, three in the top band) that follows captures through to the end of an exchange, with basic material and center-control scoring, tuned to roughly your own rating band (~"
+      + TUNING.eloValue + ", " + TUNING.label + ") rather than a fixed difficulty. Among its near-best options each move, it checks for baits in a random order weighted by how common each pattern is in your blunders (hung material, discovered attack, fork, pin), stopping at the first it finds — the same checks review.py's own motif detection uses, just run against the near-best pool instead of a single played move.";
+    var al = WEAKNESS.allowed;
+    if (al) {
+      weaknessLine += " The punishing side uses a different measure: what you left available to an opponent (their best reply to each of those blunders): " +
+        [["hung_material", "a free piece"], ["discovered_attack", "a discovered attack"], ["fork", "a fork"], ["pin", "a pin"]]
+          .map(function (e) { return al[e[0]] ? al[e[0]].count + " (" + al[e[0]].pct + "%) allowed " + e[1] : null; })
+          .filter(Boolean).join("; ") + ". The bot tries its punishing moves in that order.";
+    }
+    document.getElementById("howWeaknessText").textContent = weaknessLine;
+    document.getElementById("howEngineText").textContent = engineLine;
+  }
+
+  // ---- opponent rating widget ----
+  function renderRatingWidget() {
+    var sel = document.getElementById("ratingSelect");
+    if (!sel.options.length) {
+      var autoOpt = document.createElement("option");
+      autoOpt.value = "auto";
+      autoOpt.textContent = "Auto — matches your rating (~" + TUNING.eloValue + ")";
+      sel.appendChild(autoOpt);
+      BANDS.forEach(function (band) {
+        var opt = document.createElement("option");
+        opt.value = String(band.id);
+        opt.textContent = band.label;
+        sel.appendChild(opt);
+      });
+      sel.value = state.ratingChoice;
+    }
+    var tuning = activeTuning();
+    var hint = state.ratingChoice === "auto"
+      ? "Recalculated from your latest bulk_review.py data each session. Switch to a fixed band to practice above or below your current level."
+      : "Manual override for this tab only — takes effect on the bot's next move. Pick Auto to go back to your calibrated rating.";
+    document.getElementById("ratingHint").textContent = hint;
+  }
+
+  // ---- review mode ----
+  function resolveTarget(fen, bestSan) {
+    var scratch = new Chess(fen);
+    var mv = scratch.move(bestSan);
+    return mv ? { from: mv.from, to: mv.to, promotion: mv.promotion || null, san: mv.san } : null;
+  }
+
+  // Review flow (rewritten 2026-09-24: it used to be one attempt per puzzle,
+  // no retry, and no repeat of misses). Now:
+  //   - a wrong answer offers Try again or Show answer (unlimited tries);
+  //   - the answer reveal says WHY the move works (build.py explain_best,
+  //     from the position's own mechanics, not a canned line);
+  //   - when a round ends, every puzzle you missed on the FIRST try comes
+  //     back as the next round, until a round has no misses.
+  // History semantics are unchanged: `attempted` / `correct` count round-1
+  // first tries only, so retries and redo rounds can't inflate the solve
+  // rate. Redo work is saved separately (`redoSolved`, `rounds`).
+  function newRun(r) {
+    r.order = PUZZLES.map(function (_, i) { return i; });
+    r.pos = 0; r.round = 1; r.missed = {}; r.counted = {}; r.done = false;
+    r.tries = 0; r.wrong = false; r.redoSolved = 0;
+  }
+
+  function loadPuzzle(idx) {
+    var r = state.review;
+    r.idx = idx;
+    r.answered = false; r.lastCorrect = null; r.wrong = false; r.tries = 0;
+    r.selected = null; r.legalTargets = []; r.lastMove = null;
+    var p = PUZZLES[idx];
+    if (!p) { r.game = null; r.target = null; return; }
+    r.game = new Chess(p.fen);
+    r.target = resolveTarget(p.fen, p.best);
+  }
+
+  function enterReview() {
+    state.screen = "review";
+    var r = state.review;
+    if (PUZZLES.length && !r.order) newRun(r);
+    if (PUZZLES.length && !r.game && !r.done) loadPuzzle(r.order[r.pos]);
+    render();
+  }
+
+  function exitReview() {
+    state.screen = "setup";
+    render();
+  }
+
+  // Ends the current round: whatever was missed on the first try becomes
+  // the next round, or the run is finished.
+  function endRound() {
+    var r = state.review;
+    var redo = r.order.filter(function (i) { return r.missed[i]; });
+    if (!redo.length) { r.done = true; r.game = null; logReviewAnswer(); return; }
+    r.order = redo; r.pos = 0; r.round++; r.missed = {};
+    loadPuzzle(r.order[0]);
+    logReviewAnswer();
+  }
+
+  function stepPuzzle(delta) {
+    var r = state.review;
+    if (!PUZZLES.length || !r.order) return;
+    if (r.done) return;
+    // Leaving a puzzle unsolved (skipping it) counts as a miss, so it comes back.
+    if (delta > 0 && !r.answered) r.missed[r.idx] = true;
+    var np = r.pos + delta;
+    if (np < 0) np = r.order.length - 1;
+    if (np >= r.order.length) { endRound(); render(); return; }
+    r.pos = np;
+    loadPuzzle(r.order[np]);
+    render();
+  }
+  function nextPuzzle() { stepPuzzle(1); }
+  function prevPuzzle() { stepPuzzle(-1); }
+
+  function restartReview() {
+    var r = state.review;
+    r.ref = null; r.correct = 0; r.attempted = 0;
+    newRun(r);
+    loadPuzzle(r.order[0]);
+    render();
+  }
+
+  function retryPuzzle() {
+    var r = state.review;
+    if (r.done || r.answered) return;
+    var tries = r.tries;
+    loadPuzzle(r.idx);
+    r.tries = tries;
+    render();
+  }
+
+  function revealPuzzle() {
+    var r = state.review, p = PUZZLES[r.idx];
+    if (r.done || r.answered) return;
+    var tries = r.tries;
+    loadPuzzle(r.idx);
+    r.tries = tries;
+    if (r.target) {
+      var mv = r.game.move({ from: r.target.from, to: r.target.to, promotion: r.target.promotion || "q" });
+      if (mv) r.lastMove = { from: mv.from, to: mv.to };
+    }
+    r.answered = true; r.lastCorrect = false; r.revealed = true;
+    r.missed[r.idx] = true;
+    render();
+  }
+
+  function onReviewSquareClick(sq) {
+    var r = state.review;
+    if (state.screen !== "review" || r.answered || r.wrong || !r.game) return;
+    var piece = r.game.get(sq);
+    if (r.selected) {
+      if (r.selected === sq) { r.selected = null; r.legalTargets = []; render(); return; }
+      var target = r.legalTargets.filter(function (t) { return t.to === sq; })[0];
+      if (target) { applyReviewMove(r.selected, sq); return; }
+      if (piece && piece.color === r.game.turn()) { selectReviewSquare(sq); return; }
+      r.selected = null; r.legalTargets = []; render();
+      return;
+    }
+    if (piece && piece.color === r.game.turn()) selectReviewSquare(sq);
+  }
+
+  function selectReviewSquare(sq) {
+    var r = state.review;
+    r.selected = sq;
+    var moves = r.game.moves({ square: sq, verbose: true });
+    var byTo = {};
+    moves.forEach(function (m) {
+      if (!byTo[m.to]) byTo[m.to] = { to: m.to, capture: !!m.captured };
+    });
+    r.legalTargets = Object.keys(byTo).map(function (k) { return byTo[k]; });
+    render();
+  }
+
+  // Always promotes to queen if the target square needs one; a puzzle whose
+  // right answer under-promotes doesn't occur in this data (best moves come
+  // straight from Stockfish's own suggestion).
+  function applyReviewMove(from, to) {
+    var r = state.review;
+    var mv = r.game.move({ from: from, to: to, promotion: "q" });
+    if (!mv) return;
+    r.selected = null; r.legalTargets = [];
+    r.lastMove = { from: from, to: to };
+    var t = r.target;
+    var correct = !!t && mv.from === t.from && mv.to === t.to;
+    var firstTry = r.tries === 0;
+    // Round-1 first tries are the only ones that feed History's solve rate.
+    if (r.round === 1 && !r.counted[r.idx]) {
+      r.counted[r.idx] = true;
+      r.attempted++;
+      if (correct) r.correct++;
+    }
+    if (correct) {
+      r.answered = true; r.lastCorrect = true;
+      if (r.round > 1) r.redoSolved++;
+    } else {
+      r.wrong = true; r.tries++;
+      r.missed[r.idx] = true;
+    }
+    logReviewAnswer();
+    render();
+  }
+
+  function renderWhy(p) {
+    var items = (p.why || []).map(function (w) { return "<li>" + w + "</li>"; }).join("");
+    if (!items) return "";
+    var tag = p.label ? '<span class="tag">' + p.label + "</span> " : "";
+    return '<div class="why"><b>Why it works</b> ' + tag + "<ul>" + items + "</ul></div>";
+  }
+
+  function renderReview() {
+    var r = state.review, p = PUZZLES[r.idx];
+    document.getElementById("reviewSetMeta").textContent = PUZZLE_META.week_range
+      ? PUZZLE_META.count + " of " + PUZZLE_META.games_with_key_moment + " competitive key moments from " +
+        PUZZLE_META.games_in_week + " games (" + PUZZLE_META.week_range + ")"
+      : "";
+    if (!PUZZLES.length) {
+      document.getElementById("reviewStatusText").textContent = "No key moments found.";
+      document.getElementById("reviewMeta").innerHTML =
+        "No competitive blunders or mistakes turned up in the last 7 days of saved bulk_review.py data. Run a progress report first, or check back after playing more.";
+      document.getElementById("reviewFeedback").innerHTML = "";
+      renderBoardInto("reviewBoardSvg", null, {});
+      document.getElementById("reviewBarTop").innerHTML = "";
+      document.getElementById("reviewBarBottom").innerHTML = "";
+      return;
+    }
+    document.getElementById("reviewCorrect").textContent = r.correct;
+    if (r.done) {
+      document.getElementById("reviewIdx").textContent = "done";
+      document.getElementById("reviewStatusText").textContent = "Run complete.";
+      document.getElementById("reviewMeta").innerHTML = "";
+      renderBoardInto("reviewBoardSvg", null, {});
+      document.getElementById("reviewBarTop").innerHTML = "";
+      document.getElementById("reviewBarBottom").innerHTML = "";
+      document.getElementById("reviewFeedback").innerHTML =
+        '<div class="feedback-banner correct">Every puzzle solved.' +
+        '<span class="detail">' + r.correct + " of " + r.attempted + " on the first try" +
+        (r.round > 1 ? "; the rest took " + (r.round - 1) + " redo round" + (r.round > 2 ? "s" : "") : "") + ".</span>" +
+        '<div class="fb-actions"><button class="btn" data-act="restart">Start over</button></div></div>';
+      return;
+    }
+    renderBoardInto("reviewBoardSvg", r.game, {
+      flip: p.color === "b",
+      legalTargets: r.legalTargets, selected: r.selected, lastMove: r.lastMove,
+      clickable: !r.answered && !r.wrong
+    });
+    var mover = p.color === "w" ? "White" : "Black";
+    document.getElementById("reviewBarTop").innerHTML = '<span class="name">' + p.opp + "</span><span></span>";
+    document.getElementById("reviewBarBottom").innerHTML = '<span class="name">You</span><span></span>';
+    document.getElementById("reviewIdx").textContent = (r.pos + 1) + " / " + r.order.length +
+      (r.round > 1 ? " (redo round " + (r.round - 1) + ")" : "");
+    document.getElementById("reviewMeta").innerHTML =
+      "vs. " + p.opp + " &middot; " + p.date + " &middot; " + p.phase + "<br>" +
+      "Find the best move for " + mover + "." +
+      (p.review ? ' <a href="' + p.review + '" target="_blank" rel="noopener">Full review of this game ↗</a>' : "") +
+      (p.url ? ' <a href="' + p.url + '" target="_blank" rel="noopener">View on chess.com ↗</a>' : "");
+    var fb = document.getElementById("reviewFeedback");
+    if (r.answered) {
+      document.getElementById("reviewStatusText").textContent = r.lastCorrect ? "Correct." : "Answer shown.";
+      var cls = r.lastCorrect ? "correct" : "incorrect";
+      var san = r.target ? r.target.san : p.best;
+      var headline = r.lastCorrect
+        ? (r.tries ? "Found it on try " + (r.tries + 1) + "." : "Found it.")
+        : "The engine's move was " + san + ".";
+      var last = r.pos + 1 >= r.order.length;
+      fb.innerHTML =
+        '<div class="feedback-banner ' + cls + '">' + headline +
+        '<span class="detail">In the real game you played ' + p.played + " here (tagged " + p.tag + ").</span>" +
+        renderWhy(p) +
+        (r.lastCorrect || !r.missed[r.idx] ? "" : '<span class="detail">This one comes back in the next round.</span>') +
+        '<div class="fb-actions"><button class="btn primary" data-act="next">' +
+        (last ? (Object.keys(r.missed).length ? "Redo the misses ▶" : "Finish ▶") : "Next puzzle ▶") + "</button></div></div>";
+    } else if (r.wrong) {
+      document.getElementById("reviewStatusText").textContent = "Not quite.";
+      fb.innerHTML =
+        '<div class="feedback-banner incorrect">Not the engine\'s move.' +
+        '<span class="detail">Try again, or reveal the answer and the reason it works. Puzzles you miss come back at the end.</span>' +
+        '<div class="fb-actions"><button class="btn primary" data-act="retry">Try again</button>' +
+        '<button class="btn" data-act="reveal">Show answer</button></div></div>';
+    } else {
+      document.getElementById("reviewStatusText").textContent = "Your move as " + mover + ".";
+      fb.innerHTML = "";
+    }
+  }
+
+  function render() {
+    var inReview = state.screen === "review";
+    document.getElementById("practiceLayout").hidden = inReview;
+    document.getElementById("reviewLayout").hidden = !inReview;
+    if (inReview) {
+      renderReview();
+      document.getElementById("footerNote").textContent = "Review mode: retry as often as you like; puzzles you miss on the first try come back in a redo round. Sourced from your own last 7 days of saved bulk_review.py data. Only first tries in round 1 count toward History's solve rate; the position itself resets if you reload.";
+      return;
+    }
+    document.getElementById("setupCard").hidden = state.screen !== "setup";
+    renderBadges();
+    renderRatingWidget();
+    renderHowItWorks();
+    renderBoard();
+    renderBars();
+    renderStatus();
+    renderMoveList();
+    renderPromo();
+    document.getElementById("statOffered").textContent = state.baitOffered;
+    document.getElementById("statTaken").textContent = state.baitTaken;
+    document.getElementById("statPunished").textContent = Object.keys(state.punish).reduce(function (n, k) { return n + state.punish[k]; }, 0);
+    document.getElementById("overBanner").innerHTML = state.over ? '<div class="over-banner">' + state.overText + "</div>" : "";
+    document.getElementById("footerNote").textContent = "The game in progress lives in this browser tab. Finished games and review runs are saved to this browser's own history (see History), kept separate from your real games and the ledger data. Run practice.py again to recheck your rating and blunder mix and rebuild this page.";
+  }
+
+  // ---- events ----
+  document.getElementById("boardSvg").addEventListener("click", function (e) {
+    var g = e.target.closest ? e.target.closest("[data-square]") : null;
+    if (g) onSquareClick(g.getAttribute("data-square"));
+  });
+  document.getElementById("btnWhite").addEventListener("click", function () { startGame("w"); });
+  document.getElementById("btnBlack").addEventListener("click", function () { startGame("b"); });
+  document.getElementById("btnNewGame").addEventListener("click", function () {
+    if (state.game && !state.over && state.history.length >= 8) logGame("abandoned");
+    state.screen = "setup"; state.game = null; render();
+  });
+  document.getElementById("promoInner").addEventListener("click", function (e) {
+    var btn = e.target.closest("button[data-promo]");
+    if (!btn || !state.pendingPromotion) return;
+    var p = state.pendingPromotion;
+    applyHumanMove(p.from, p.to, btn.getAttribute("data-promo"));
+  });
+  document.getElementById("ratingSelect").addEventListener("change", function (e) {
+    var v = e.target.value;
+    state.ratingChoice = v === "auto" ? "auto" : Number(v);
+    render();
+  });
+  document.getElementById("btnReview").addEventListener("click", enterReview);
+  document.getElementById("btnReviewExit").addEventListener("click", exitReview);
+  document.getElementById("btnReviewNext").addEventListener("click", nextPuzzle);
+  document.getElementById("btnReviewPrev").addEventListener("click", prevPuzzle);
+  document.getElementById("reviewFeedback").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("button[data-act]") : null;
+    if (!b) return;
+    var act = b.getAttribute("data-act");
+    if (act === "retry") retryPuzzle();
+    else if (act === "reveal") revealPuzzle();
+    else if (act === "next") nextPuzzle();
+    else if (act === "restart") restartReview();
+  });
+  document.getElementById("reviewBoardSvg").addEventListener("click", function (e) {
+    var g = e.target.closest ? e.target.closest("[data-square]") : null;
+    if (g) onReviewSquareClick(g.getAttribute("data-square"));
+  });
+
+  // ---- boot / hot state ----
+  function snapshot() {
+    return {
+      screen: state.screen, humanColor: state.humanColor, botColor: state.botColor,
+      fen: state.game ? state.game.fen() : null,
+      history: state.history, lastMove: state.lastMove, lastBait: state.lastBait,
+      baitOffered: state.baitOffered, baitTaken: state.baitTaken,
+      over: state.over, overText: state.overText
+    };
+  }
+  function boot(data) {
+    if (data && data.fen) {
+      state.screen = data.screen || "playing";
+      state.humanColor = data.humanColor; state.botColor = data.botColor;
+      state.game = new Chess(data.fen);
+      state.history = data.history || []; state.lastMove = data.lastMove || null;
+      state.lastBait = data.lastBait || null;
+      state.baitOffered = data.baitOffered || 0; state.baitTaken = data.baitTaken || 0;
+      state.over = !!data.over; state.overText = data.overText || "";
+    }
+    render();
+  }
+  initDb();
+  try {
+    if (window.claude && window.claude.hot) {
+      window.claude.hot.snapshot(snapshot);
+      if (window.claude.hot.ready) window.claude.hot.ready(boot);
+      else boot(window.claude.hot.data);
+    } else {
+      render();
+    }
+  } catch (e) { render(); }
+})();
+</script>

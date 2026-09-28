@@ -1,0 +1,2142 @@
+{
+  "headers": {
+    "White": "aetrone",
+    "Black": "fexter974",
+    "WhiteElo": "369",
+    "BlackElo": "369",
+    "Result": "0-1",
+    "Termination": "fexter974 won by resignation",
+    "Date": "2026.09.24",
+    "TimeControl": "600",
+    "ECO": "C50",
+    "ECOUrl": "https://www.chess.com/openings/Italian-Game",
+    "Link": "https://www.chess.com/game/live/184288369352"
+  },
+  "my_color": "white",
+  "opening": {
+    "eco": "C50",
+    "name": "Italian Game",
+    "plies": 5
+  },
+  "accuracy": {
+    "white": 61.1,
+    "black": 72.3
+  },
+  "fens": [
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+    "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+    "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+    "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+    "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+    "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+    "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/PP1P1PPP/RNBQK2R b KQkq - 0 4",
+    "r1bqk1nr/pppp1ppp/2n5/b3p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R w KQkq - 1 5",
+    "r1bqk1nr/pppp1ppp/2n5/b3p3/2BPP3/2P2N2/PP3PPP/RNBQK2R b KQkq - 0 5",
+    "r1bqk1nr/ppp2ppp/2np4/b3p3/2BPP3/2P2N2/PP3PPP/RNBQK2R w KQkq - 0 6",
+    "r1bqk1nr/ppp2ppp/2np4/b3p3/2BPP3/2P1BN2/PP3PPP/RN1QK2R b KQkq - 1 6",
+    "r1bqk2r/ppp2ppp/2np1n2/b3p3/2BPP3/2P1BN2/PP3PPP/RN1QK2R w KQkq - 2 7",
+    "r1bqk2r/ppp2ppp/2np1n2/b3p3/2BPP3/2P1BN2/PP1N1PPP/R2QK2R b KQkq - 3 7",
+    "r2qk2r/ppp2ppp/2np1n2/b3p3/2BPP1b1/2P1BN2/PP1N1PPP/R2QK2R w KQkq - 4 8",
+    "r2qk2r/ppp2ppp/2np1n2/b3p3/2BPP1b1/2P1BN2/PP1N1PPP/R2Q1RK1 b kq - 5 8",
+    "r2qk2r/p1p2ppp/2np1n2/bp2p3/2BPP1b1/2P1BN2/PP1N1PPP/R2Q1RK1 w kq - 0 9",
+    "r2qk2r/p1p2ppp/2np1n2/bp2p3/3PP1b1/2PBBN2/PP1N1PPP/R2Q1RK1 b kq - 1 9",
+    "r3k2r/p1pq1ppp/2np1n2/bp2p3/3PP1b1/2PBBN2/PP1N1PPP/R2Q1RK1 w kq - 2 10",
+    "r3k2r/p1pq1ppp/2np1n2/bp2p3/1P1PP1b1/2PBBN2/P2N1PPP/R2Q1RK1 b kq - 0 10",
+    "r3k2r/p1pq1ppp/1bnp1n2/1p2p3/1P1PP1b1/2PBBN2/P2N1PPP/R2Q1RK1 w kq - 1 11",
+    "r3k2r/p1pq1ppp/1bnp1n2/1p1Pp3/1P2P1b1/2PBBN2/P2N1PPP/R2Q1RK1 b kq - 0 11",
+    "r3k2r/p1pqnppp/1b1p1n2/1p1Pp3/1P2P1b1/2PBBN2/P2N1PPP/R2Q1RK1 w kq - 1 12",
+    "r3k2r/p1pqnppp/1b1p1n2/1p1Pp3/1P2P1b1/2PBBN2/P2NQPPP/R4RK1 b kq - 2 12",
+    "2kr3r/p1pqnppp/1b1p1n2/1p1Pp3/1P2P1b1/2PBBN2/P2NQPPP/R4RK1 w - - 3 13",
+    "2kr3r/p1pqnppp/1b1p1n2/1B1Pp3/1P2P1b1/2P1BN2/P2NQPPP/R4RK1 b - - 0 13",
+    "2kr3r/p2qnppp/1bpp1n2/1B1Pp3/1P2P1b1/2P1BN2/P2NQPPP/R4RK1 w - - 0 14",
+    "2kr3r/p2qnppp/1bPp1n2/1B2p3/1P2P1b1/2P1BN2/P2NQPPP/R4RK1 b - - 0 14",
+    "2kr3r/p2q1ppp/1bnp1n2/1B2p3/1P2P1b1/2P1BN2/P2NQPPP/R4RK1 w - - 0 15",
+    "2kr3r/p2q1ppp/1bnp1n2/1B2p3/PP2P1b1/2P1BN2/3NQPPP/R4RK1 b - - 0 15",
+    "2kr3r/3q1ppp/1bnp1n2/pB2p3/PP2P1b1/2P1BN2/3NQPPP/R4RK1 w - - 0 16",
+    "2kr3r/3q1ppp/1bnp1n2/PB2p3/P3P1b1/2P1BN2/3NQPPP/R4RK1 b - - 0 16",
+    "2kr3r/3q1ppp/2np1n2/bB2p3/P3P1b1/2P1BN2/3NQPPP/R4RK1 w - - 0 17",
+    "2kr3r/3q1ppp/B1np1n2/b3p3/P3P1b1/2P1BN2/3NQPPP/R4RK1 b - - 1 17",
+    "3r3r/2kq1ppp/B1np1n2/b3p3/P3P1b1/2P1BN2/3NQPPP/R4RK1 w - - 2 18",
+    "3r3r/2kq1ppp/B1np1n2/b3p3/P1N1P1b1/2P1BN2/4QPPP/R4RK1 b - - 3 18",
+    "3r3r/2kq1ppp/B1np1n2/4p3/P1N1P1b1/2b1BN2/4QPPP/R4RK1 w - - 0 19",
+    "3r3r/2kq1ppp/B1np1n2/4p3/P1N1P1b1/R1b1BN2/4QPPP/5RK1 b - - 1 19",
+    "3r3r/2kq1ppp/B1np1n2/4p3/P1NbP1b1/R3BN2/4QPPP/5RK1 w - - 2 20",
+    "3r3r/2kq1ppp/B1np1n2/4p3/P1NbP1b1/1R2BN2/4QPPP/5RK1 b - - 3 20",
+    "r6r/2kq1ppp/B1np1n2/4p3/P1NbP1b1/1R2BN2/4QPPP/5RK1 w - - 4 21",
+    "r6r/2kq1ppp/2np1n2/1B2p3/P1NbP1b1/1R2BN2/4QPPP/5RK1 b - - 5 21",
+    "r6r/2kq1ppp/2np4/1B2p3/P1Nbn1b1/1R2BN2/4QPPP/5RK1 w - - 0 22",
+    "r6r/2kq1ppp/2np4/1B2p3/P1Nbn1b1/1R1QBN2/5PPP/5RK1 b - - 1 22",
+    "r6r/2kq1ppp/2np4/1Bn1p3/P1Nb2b1/1R1QBN2/5PPP/5RK1 w - - 2 23",
+    "r6r/2kq1ppp/1Nnp4/1Bn1p3/P2b2b1/1R1QBN2/5PPP/5RK1 b - - 3 23",
+    "r6r/3q1ppp/1knp4/1Bn1p3/P2b2b1/1R1QBN2/5PPP/5RK1 w - - 0 24",
+    "r6r/3q1ppp/1knp4/2n1p3/P1Bb2b1/1R1QBN2/5PPP/5RK1 b - - 1 24",
+    "r6r/2kq1ppp/2np4/2n1p3/P1Bb2b1/1R1QBN2/5PPP/5RK1 w - - 2 25",
+    "r6r/2kq1ppp/2np4/2n1p3/P1BN2b1/1R1QB3/5PPP/5RK1 b - - 0 25",
+    "r6r/2kq1ppp/2np4/4p3/P1BN2b1/1R1nB3/5PPP/5RK1 w - - 0 26",
+    "r6r/2kq1ppp/2np4/4p3/P1BN2b1/3RB3/5PPP/5RK1 b - - 0 26",
+    "r6r/2kq1ppp/2np4/8/P1Bp2b1/3RB3/5PPP/5RK1 w - - 0 27",
+    "r6r/2kq1ppp/2np4/8/P1BB2b1/3R4/5PPP/5RK1 b - - 0 27",
+    "7r/2kq1ppp/2np4/8/r1BB2b1/3R4/5PPP/5RK1 w - - 0 28"
+  ],
+  "annotations": [
+    {
+      "ply": 0,
+      "fullmove": 1,
+      "color": "white",
+      "san": "e4",
+      "tag": "Book",
+      "phase": "opening",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "e2e4",
+      "eval_after_white": 32,
+      "clock": 599.0,
+      "move_accuracy": 100.0,
+      "is_me": true,
+      "wp_before": 52.8,
+      "wp_after": 52.9,
+      "gap_to_second_best": 9
+    },
+    {
+      "ply": 1,
+      "fullmove": 1,
+      "color": "black",
+      "san": "e5",
+      "tag": "Book",
+      "phase": "opening",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "e7e5",
+      "eval_after_white": 29,
+      "clock": 595.4,
+      "move_accuracy": 100.0,
+      "is_me": false,
+      "wp_before": 47.1,
+      "wp_after": 47.3,
+      "gap_to_second_best": 4
+    },
+    {
+      "ply": 2,
+      "fullmove": 2,
+      "color": "white",
+      "san": "Nf3",
+      "tag": "Book",
+      "phase": "opening",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "g1f3",
+      "eval_after_white": 30,
+      "clock": 598.1,
+      "move_accuracy": 100.0,
+      "is_me": true,
+      "wp_before": 52.7,
+      "wp_after": 52.8,
+      "gap_to_second_best": 21
+    },
+    {
+      "ply": 3,
+      "fullmove": 2,
+      "color": "black",
+      "san": "Nc6",
+      "tag": "Book",
+      "phase": "opening",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "b8c6",
+      "eval_after_white": 24,
+      "clock": 592.3,
+      "move_accuracy": 100.0,
+      "is_me": false,
+      "wp_before": 47.2,
+      "wp_after": 47.8,
+      "gap_to_second_best": 15
+    },
+    {
+      "ply": 4,
+      "fullmove": 3,
+      "color": "white",
+      "san": "Bc4",
+      "tag": "Book",
+      "phase": "opening",
+      "cpl": 19,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "f1c4",
+      "eval_after_white": 5,
+      "clock": 593.2,
+      "move_accuracy": 92.4,
+      "is_me": true,
+      "wp_before": 52.2,
+      "wp_after": 50.5,
+      "gap_to_second_best": 9
+    },
+    {
+      "ply": 5,
+      "fullmove": 3,
+      "color": "black",
+      "san": "Bb4",
+      "tag": "Mistake",
+      "phase": "opening",
+      "cpl": 130,
+      "best_san": "Bc5",
+      "best_uci": "f8c5",
+      "uci": "f8b4",
+      "eval_after_white": 135,
+      "clock": 587.6,
+      "move_accuracy": 58.8,
+      "is_me": false,
+      "wp_before": 49.5,
+      "wp_after": 37.8,
+      "gap_to_second_best": 2
+    },
+    {
+      "ply": 6,
+      "fullmove": 4,
+      "color": "white",
+      "san": "c3",
+      "tag": "Best",
+      "phase": "opening",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "c2c3",
+      "eval_after_white": 143,
+      "clock": 585.4,
+      "move_accuracy": 100.0,
+      "is_me": true,
+      "wp_before": 62.2,
+      "wp_after": 62.9,
+      "gap_to_second_best": 65
+    },
+    {
+      "ply": 7,
+      "fullmove": 4,
+      "color": "black",
+      "san": "Ba5",
+      "tag": "Best",
+      "phase": "opening",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "b4a5",
+      "eval_after_white": 139,
+      "clock": 586.0,
+      "move_accuracy": 100.0,
+      "is_me": false,
+      "wp_before": 37.1,
+      "wp_after": 37.5,
+      "gap_to_second_best": 36
+    },
+    {
+      "ply": 8,
+      "fullmove": 5,
+      "color": "white",
+      "san": "d4",
+      "tag": "Best",
+      "phase": "opening",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "d2d4",
+      "eval_after_white": 144,
+      "clock": 582.2,
+      "move_accuracy": 100.0,
+      "is_me": true,
+      "wp_before": 62.5,
+      "wp_after": 63.0,
+      "gap_to_second_best": 0
+    },
+    {
+      "ply": 9,
+      "fullmove": 5,
+      "color": "black",
+      "san": "d6",
+      "tag": "Good",
+      "phase": "opening",
+      "cpl": 35,
+      "best_san": "exd4",
+      "best_uci": "e5d4",
+      "uci": "d7d6",
+      "eval_after_white": 179,
+      "clock": 570.7,
+      "move_accuracy": 87.6,
+      "is_me": false,
+      "wp_before": 37.0,
+      "wp_after": 34.1,
+      "gap_to_second_best": 23
+    },
+    {
+      "ply": 10,
+      "fullmove": 6,
+      "color": "white",
+      "san": "Be3",
+      "tag": "Mistake",
+      "phase": "opening",
+      "cpl": 156,
+      "best_san": "a4",
+      "best_uci": "a2a4",
+      "uci": "c1e3",
+      "eval_after_white": 23,
+      "clock": 579.0,
+      "move_accuracy": 53.4,
+      "is_me": true,
+      "wp_before": 65.9,
+      "wp_after": 52.1,
+      "gap_to_second_best": 25
+    },
+    {
+      "ply": 11,
+      "fullmove": 6,
+      "color": "black",
+      "san": "Nf6",
+      "tag": "Mistake",
+      "phase": "opening",
+      "cpl": 110,
+      "best_san": "exd4",
+      "best_uci": "e5d4",
+      "uci": "g8f6",
+      "eval_after_white": 133,
+      "clock": 565.3,
+      "move_accuracy": 63.9,
+      "is_me": false,
+      "wp_before": 47.9,
+      "wp_after": 38.0,
+      "gap_to_second_best": 14
+    },
+    {
+      "ply": 12,
+      "fullmove": 7,
+      "color": "white",
+      "san": "Nbd2",
+      "tag": "Mistake",
+      "phase": "opening",
+      "cpl": 108,
+      "best_san": "Qa4",
+      "best_uci": "d1a4",
+      "uci": "b1d2",
+      "eval_after_white": 25,
+      "clock": 574.3,
+      "move_accuracy": 64.4,
+      "is_me": true,
+      "wp_before": 62.0,
+      "wp_after": 52.3,
+      "gap_to_second_best": 95
+    },
+    {
+      "ply": 13,
+      "fullmove": 7,
+      "color": "black",
+      "san": "Bg4",
+      "tag": "Mistake",
+      "phase": "opening",
+      "cpl": 166,
+      "best_san": "exd4",
+      "best_uci": "e5d4",
+      "uci": "c8g4",
+      "eval_after_white": 191,
+      "clock": 560.8,
+      "move_accuracy": 51.5,
+      "is_me": false,
+      "wp_before": 47.7,
+      "wp_after": 33.1,
+      "gap_to_second_best": 1
+    },
+    {
+      "ply": 14,
+      "fullmove": 8,
+      "color": "white",
+      "san": "O-O",
+      "tag": "Blunder",
+      "phase": "opening",
+      "cpl": 202,
+      "best_san": "Qb3",
+      "best_uci": "d1b3",
+      "uci": "e1g1",
+      "eval_after_white": -11,
+      "clock": 556.8,
+      "move_accuracy": 44.1,
+      "is_me": true,
+      "wp_before": 66.9,
+      "wp_after": 49.0,
+      "gap_to_second_best": 123
+    },
+    {
+      "ply": 15,
+      "fullmove": 8,
+      "color": "black",
+      "san": "b5",
+      "tag": "Blunder",
+      "phase": "opening",
+      "cpl": 643,
+      "best_san": "exd4",
+      "best_uci": "e5d4",
+      "uci": "b7b5",
+      "eval_after_white": 632,
+      "clock": 556.7,
+      "move_accuracy": 13.3,
+      "is_me": false,
+      "wp_before": 51.0,
+      "wp_after": 8.9,
+      "gap_to_second_best": 42
+    },
+    {
+      "ply": 16,
+      "fullmove": 9,
+      "color": "white",
+      "san": "Bd3",
+      "tag": "Miss",
+      "phase": "opening",
+      "cpl": 460,
+      "best_san": "Bxb5",
+      "best_uci": "c4b5",
+      "uci": "c4d3",
+      "eval_after_white": 172,
+      "clock": 539.5,
+      "move_accuracy": 8.0,
+      "is_me": true,
+      "wp_before": 91.1,
+      "wp_after": 65.3,
+      "gap_to_second_best": 436
+    },
+    {
+      "ply": 17,
+      "fullmove": 9,
+      "color": "black",
+      "san": "Qd7",
+      "tag": "Blunder",
+      "phase": "opening",
+      "cpl": 431,
+      "best_san": "a6",
+      "best_uci": "a7a6",
+      "uci": "d8d7",
+      "eval_after_white": 603,
+      "clock": 549.1,
+      "move_accuracy": 31.8,
+      "is_me": false,
+      "wp_before": 34.7,
+      "wp_after": 9.8,
+      "gap_to_second_best": 43
+    },
+    {
+      "ply": 18,
+      "fullmove": 10,
+      "color": "white",
+      "san": "b4",
+      "tag": "Blunder",
+      "phase": "opening",
+      "cpl": 271,
+      "best_san": "Bxb5",
+      "best_uci": "d3b5",
+      "uci": "b2b4",
+      "eval_after_white": 332,
+      "clock": 528.2,
+      "move_accuracy": 45.8,
+      "is_me": true,
+      "wp_before": 90.2,
+      "wp_after": 77.2,
+      "gap_to_second_best": 54
+    },
+    {
+      "ply": 19,
+      "fullmove": 10,
+      "color": "black",
+      "san": "Bb6",
+      "tag": "Miss",
+      "phase": "opening",
+      "cpl": 427,
+      "best_san": "exd4",
+      "best_uci": "e5d4",
+      "uci": "a5b6",
+      "eval_after_white": 759,
+      "clock": 540.6,
+      "move_accuracy": 46.1,
+      "is_me": false,
+      "wp_before": 22.8,
+      "wp_after": 5.8,
+      "gap_to_second_best": 309
+    },
+    {
+      "ply": 20,
+      "fullmove": 11,
+      "color": "white",
+      "san": "d5",
+      "tag": "Miss",
+      "phase": "middlegame",
+      "cpl": 615,
+      "best_san": "Bxb5",
+      "best_uci": "d3b5",
+      "uci": "d4d5",
+      "eval_after_white": 144,
+      "clock": 498.2,
+      "move_accuracy": 0.0,
+      "is_me": true,
+      "wp_before": 94.2,
+      "wp_after": 63.0,
+      "gap_to_second_best": 609
+    },
+    {
+      "ply": 21,
+      "fullmove": 11,
+      "color": "black",
+      "san": "Ne7",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "c6e7",
+      "eval_after_white": 139,
+      "clock": 527.7,
+      "move_accuracy": 100.0,
+      "is_me": false,
+      "wp_before": 37.0,
+      "wp_after": 37.5,
+      "gap_to_second_best": 119
+    },
+    {
+      "ply": 22,
+      "fullmove": 12,
+      "color": "white",
+      "san": "Qe2",
+      "tag": "Good",
+      "phase": "middlegame",
+      "cpl": 29,
+      "best_san": "Bxb6",
+      "best_uci": "e3b6",
+      "uci": "d1e2",
+      "eval_after_white": 110,
+      "clock": 476.7,
+      "move_accuracy": 89.2,
+      "is_me": true,
+      "wp_before": 62.5,
+      "wp_after": 60.0,
+      "gap_to_second_best": 12
+    },
+    {
+      "ply": 23,
+      "fullmove": 12,
+      "color": "black",
+      "san": "O-O-O",
+      "tag": "Blunder",
+      "phase": "middlegame",
+      "cpl": 533,
+      "best_san": "a6",
+      "best_uci": "a7a6",
+      "uci": "e8c8",
+      "eval_after_white": 643,
+      "clock": 498.0,
+      "move_accuracy": 23.1,
+      "is_me": false,
+      "wp_before": 40.0,
+      "wp_after": 8.6,
+      "gap_to_second_best": 30
+    },
+    {
+      "ply": 24,
+      "fullmove": 13,
+      "color": "white",
+      "san": "Bxb5",
+      "tag": "Excellent",
+      "phase": "middlegame",
+      "cpl": 15,
+      "best_san": "a4",
+      "best_uci": "a2a4",
+      "uci": "d3b5",
+      "eval_after_white": 628,
+      "clock": 473.8,
+      "move_accuracy": 97.0,
+      "is_me": true,
+      "wp_before": 91.4,
+      "wp_after": 91.0,
+      "gap_to_second_best": 7
+    },
+    {
+      "ply": 25,
+      "fullmove": 13,
+      "color": "black",
+      "san": "c6",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 34,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "c7c6",
+      "eval_after_white": 662,
+      "clock": 460.1,
+      "move_accuracy": 93.2,
+      "is_me": false,
+      "wp_before": 9.0,
+      "wp_after": 8.0,
+      "gap_to_second_best": 302
+    },
+    {
+      "ply": 26,
+      "fullmove": 14,
+      "color": "white",
+      "san": "dxc6",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "d5c6",
+      "eval_after_white": 668,
+      "clock": 456.5,
+      "move_accuracy": 100.0,
+      "is_me": true,
+      "wp_before": 92.0,
+      "wp_after": 92.1,
+      "gap_to_second_best": 0
+    },
+    {
+      "ply": 27,
+      "fullmove": 14,
+      "color": "black",
+      "san": "Nxc6",
+      "tag": "Excellent",
+      "phase": "middlegame",
+      "cpl": 0,
+      "best_san": "Qc7",
+      "best_uci": "d7c7",
+      "uci": "e7c6",
+      "eval_after_white": 662,
+      "clock": 458.0,
+      "move_accuracy": 100.0,
+      "is_me": false,
+      "wp_before": 7.9,
+      "wp_after": 8.0,
+      "gap_to_second_best": 0
+    },
+    {
+      "ply": 28,
+      "fullmove": 15,
+      "color": "white",
+      "san": "a4",
+      "tag": "Inaccuracy",
+      "phase": "middlegame",
+      "cpl": 56,
+      "best_san": "Bxb6",
+      "best_uci": "e3b6",
+      "uci": "a2a4",
+      "eval_after_white": 606,
+      "clock": 437.9,
+      "move_accuracy": 88.8,
+      "is_me": true,
+      "wp_before": 92.0,
+      "wp_after": 90.3,
+      "gap_to_second_best": 43
+    },
+    {
+      "ply": 29,
+      "fullmove": 15,
+      "color": "black",
+      "san": "a5",
+      "tag": "Blunder",
+      "phase": "middlegame",
+      "cpl": 391,
+      "best_san": "Bxe3",
+      "best_uci": "b6e3",
+      "uci": "a7a5",
+      "eval_after_white": 997,
+      "clock": 449.2,
+      "move_accuracy": 21.8,
+      "is_me": false,
+      "wp_before": 9.7,
+      "wp_after": 2.5,
+      "gap_to_second_best": 54
+    },
+    {
+      "ply": 30,
+      "fullmove": 16,
+      "color": "white",
+      "san": "bxa5",
+      "tag": "Miss",
+      "phase": "middlegame",
+      "cpl": 287,
+      "best_san": "Bxb6",
+      "best_uci": "e3b6",
+      "uci": "b4a5",
+      "eval_after_white": 710,
+      "clock": 431.5,
+      "move_accuracy": 42.6,
+      "is_me": true,
+      "wp_before": 97.5,
+      "wp_after": 93.2,
+      "gap_to_second_best": 174
+    },
+    {
+      "ply": 31,
+      "fullmove": 16,
+      "color": "black",
+      "san": "Bxa5",
+      "tag": "Inaccuracy",
+      "phase": "middlegame",
+      "cpl": 79,
+      "best_san": "Bxe3",
+      "best_uci": "b6e3",
+      "uci": "b6a5",
+      "eval_after_white": 789,
+      "clock": 447.7,
+      "move_accuracy": 84.2,
+      "is_me": false,
+      "wp_before": 6.8,
+      "wp_after": 5.2,
+      "gap_to_second_best": 40
+    },
+    {
+      "ply": 32,
+      "fullmove": 17,
+      "color": "white",
+      "san": "Ba6+",
+      "tag": "Mistake",
+      "phase": "middlegame",
+      "cpl": 139,
+      "best_san": "Nb3",
+      "best_uci": "d2b3",
+      "uci": "b5a6",
+      "eval_after_white": 650,
+      "clock": 377.0,
+      "move_accuracy": 72.2,
+      "is_me": true,
+      "wp_before": 94.8,
+      "wp_after": 91.6,
+      "gap_to_second_best": 0
+    },
+    {
+      "ply": 33,
+      "fullmove": 17,
+      "color": "black",
+      "san": "Kc7",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "c8c7",
+      "eval_after_white": 640,
+      "clock": 431.6,
+      "move_accuracy": 100.0,
+      "is_me": false,
+      "wp_before": 8.4,
+      "wp_after": 8.7,
+      "gap_to_second_best": 207
+    },
+    {
+      "ply": 34,
+      "fullmove": 18,
+      "color": "white",
+      "san": "Nc4",
+      "tag": "Inaccuracy",
+      "phase": "middlegame",
+      "cpl": 90,
+      "best_san": "Rfb1",
+      "best_uci": "f1b1",
+      "uci": "d2c4",
+      "eval_after_white": 550,
+      "clock": 360.7,
+      "move_accuracy": 82.0,
+      "is_me": true,
+      "wp_before": 91.3,
+      "wp_after": 88.3,
+      "gap_to_second_best": 8
+    },
+    {
+      "ply": 35,
+      "fullmove": 18,
+      "color": "black",
+      "san": "Bxc3",
+      "tag": "Blunder",
+      "phase": "middlegame",
+      "cpl": 305,
+      "best_san": "Nxe4",
+      "best_uci": "f6e4",
+      "uci": "a5c3",
+      "eval_after_white": 855,
+      "clock": 419.4,
+      "move_accuracy": 71.1,
+      "is_me": false,
+      "wp_before": 11.7,
+      "wp_after": 4.1,
+      "gap_to_second_best": 73
+    },
+    {
+      "ply": 36,
+      "fullmove": 19,
+      "color": "white",
+      "san": "Ra3",
+      "tag": "Blunder",
+      "phase": "middlegame",
+      "cpl": 212,
+      "best_san": "Bb6+",
+      "best_uci": "e3b6",
+      "uci": "a1a3",
+      "eval_after_white": 643,
+      "clock": 338.7,
+      "move_accuracy": 57.6,
+      "is_me": true,
+      "wp_before": 95.9,
+      "wp_after": 91.4,
+      "gap_to_second_best": 53
+    },
+    {
+      "ply": 37,
+      "fullmove": 19,
+      "color": "black",
+      "san": "Bd4",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 32,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "c3d4",
+      "eval_after_white": 675,
+      "clock": 395.3,
+      "move_accuracy": 93.6,
+      "is_me": false,
+      "wp_before": 8.6,
+      "wp_after": 7.7,
+      "gap_to_second_best": 47
+    },
+    {
+      "ply": 38,
+      "fullmove": 20,
+      "color": "white",
+      "san": "Rb3",
+      "tag": "Inaccuracy",
+      "phase": "middlegame",
+      "cpl": 93,
+      "best_san": "Bxd4",
+      "best_uci": "e3d4",
+      "uci": "a3b3",
+      "eval_after_white": 582,
+      "clock": 310.4,
+      "move_accuracy": 81.4,
+      "is_me": true,
+      "wp_before": 92.3,
+      "wp_after": 89.5,
+      "gap_to_second_best": 37
+    },
+    {
+      "ply": 39,
+      "fullmove": 20,
+      "color": "black",
+      "san": "Ra8",
+      "tag": "Miss",
+      "phase": "middlegame",
+      "cpl": 325,
+      "best_san": "Rb8",
+      "best_uci": "d8b8",
+      "uci": "d8a8",
+      "eval_after_white": 907,
+      "clock": 344.4,
+      "move_accuracy": 72.6,
+      "is_me": false,
+      "wp_before": 10.5,
+      "wp_after": 3.4,
+      "gap_to_second_best": 258
+    },
+    {
+      "ply": 40,
+      "fullmove": 21,
+      "color": "white",
+      "san": "Bb5",
+      "tag": "Miss",
+      "phase": "middlegame",
+      "cpl": 284,
+      "best_san": "Rb7+",
+      "best_uci": "b3b7",
+      "uci": "a6b5",
+      "eval_after_white": 623,
+      "clock": 288.6,
+      "move_accuracy": 43.2,
+      "is_me": true,
+      "wp_before": 96.6,
+      "wp_after": 90.8,
+      "gap_to_second_best": 171
+    },
+    {
+      "ply": 41,
+      "fullmove": 21,
+      "color": "black",
+      "san": "Nxe4",
+      "tag": "Mistake",
+      "phase": "middlegame",
+      "cpl": 112,
+      "best_san": "Kd8",
+      "best_uci": "c7d8",
+      "uci": "f6e4",
+      "eval_after_white": 735,
+      "clock": 331.7,
+      "move_accuracy": 77.6,
+      "is_me": false,
+      "wp_before": 9.2,
+      "wp_after": 6.3,
+      "gap_to_second_best": 4
+    },
+    {
+      "ply": 42,
+      "fullmove": 22,
+      "color": "white",
+      "san": "Qd3",
+      "tag": "Blunder",
+      "phase": "middlegame",
+      "cpl": 690,
+      "best_san": "Nb6",
+      "best_uci": "c4b6",
+      "uci": "e2d3",
+      "eval_after_white": 45,
+      "clock": 258.1,
+      "move_accuracy": 0.0,
+      "is_me": true,
+      "wp_before": 93.7,
+      "wp_after": 54.1,
+      "gap_to_second_best": 37
+    },
+    {
+      "ply": 43,
+      "fullmove": 22,
+      "color": "black",
+      "san": "Nc5",
+      "tag": "Good",
+      "phase": "middlegame",
+      "cpl": 28,
+      "best_san": "Bxf3",
+      "best_uci": "g4f3",
+      "uci": "e4c5",
+      "eval_after_white": 73,
+      "clock": 312.5,
+      "move_accuracy": 89.2,
+      "is_me": false,
+      "wp_before": 45.9,
+      "wp_after": 43.3,
+      "gap_to_second_best": 11
+    },
+    {
+      "ply": 44,
+      "fullmove": 23,
+      "color": "white",
+      "san": "Nb6",
+      "tag": "Blunder",
+      "phase": "middlegame",
+      "cpl": 212,
+      "best_san": "Qb1",
+      "best_uci": "d3b1",
+      "uci": "c4b6",
+      "eval_after_white": -139,
+      "clock": 194.3,
+      "move_accuracy": 41.5,
+      "is_me": true,
+      "wp_before": 56.7,
+      "wp_after": 37.5,
+      "gap_to_second_best": 6
+    },
+    {
+      "ply": 45,
+      "fullmove": 23,
+      "color": "black",
+      "san": "Kxb6",
+      "tag": "Mistake",
+      "phase": "middlegame",
+      "cpl": 168,
+      "best_san": "Qe6",
+      "best_uci": "d7e6",
+      "uci": "c7b6",
+      "eval_after_white": 29,
+      "clock": 244.1,
+      "move_accuracy": 50.1,
+      "is_me": false,
+      "wp_before": 62.5,
+      "wp_after": 47.3,
+      "gap_to_second_best": 50
+    },
+    {
+      "ply": 46,
+      "fullmove": 24,
+      "color": "white",
+      "san": "Bc4+",
+      "tag": "Blunder",
+      "phase": "middlegame",
+      "cpl": 703,
+      "best_san": "Nxd4",
+      "best_uci": "f3d4",
+      "uci": "b5c4",
+      "eval_after_white": -674,
+      "clock": 175.1,
+      "move_accuracy": 11.4,
+      "is_me": true,
+      "wp_before": 52.7,
+      "wp_after": 7.7,
+      "gap_to_second_best": 33
+    },
+    {
+      "ply": 47,
+      "fullmove": 24,
+      "color": "black",
+      "san": "Kc7",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "b6c7",
+      "eval_after_white": -683,
+      "clock": 219.7,
+      "move_accuracy": 100.0,
+      "is_me": false,
+      "wp_before": 92.3,
+      "wp_after": 92.5,
+      "gap_to_second_best": 187
+    },
+    {
+      "ply": 48,
+      "fullmove": 25,
+      "color": "white",
+      "san": "Nxd4",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "f3d4",
+      "eval_after_white": -673,
+      "clock": 98.1,
+      "move_accuracy": 100.0,
+      "is_me": true,
+      "wp_before": 7.5,
+      "wp_after": 7.7,
+      "gap_to_second_best": 9
+    },
+    {
+      "ply": 49,
+      "fullmove": 25,
+      "color": "black",
+      "san": "Nxd3",
+      "tag": "Inaccuracy",
+      "phase": "middlegame",
+      "cpl": 75,
+      "best_san": "exd4",
+      "best_uci": "e5d4",
+      "uci": "c5d3",
+      "eval_after_white": -598,
+      "clock": 212.0,
+      "move_accuracy": 85.0,
+      "is_me": false,
+      "wp_before": 92.3,
+      "wp_after": 90.0,
+      "gap_to_second_best": 152
+    },
+    {
+      "ply": 50,
+      "fullmove": 26,
+      "color": "white",
+      "san": "Rxd3",
+      "tag": "Blunder",
+      "phase": "middlegame",
+      "cpl": 253,
+      "best_san": "Nb5+",
+      "best_uci": "d4b5",
+      "uci": "b3d3",
+      "eval_after_white": -851,
+      "clock": 85.1,
+      "move_accuracy": 49.4,
+      "is_me": true,
+      "wp_before": 10.0,
+      "wp_after": 4.2,
+      "gap_to_second_best": 48
+    },
+    {
+      "ply": 51,
+      "fullmove": 26,
+      "color": "black",
+      "san": "exd4",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 0,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "e5d4",
+      "eval_after_white": -875,
+      "clock": 198.4,
+      "move_accuracy": 100.0,
+      "is_me": false,
+      "wp_before": 95.8,
+      "wp_after": 96.2,
+      "gap_to_second_best": 65
+    },
+    {
+      "ply": 52,
+      "fullmove": 27,
+      "color": "white",
+      "san": "Bxd4",
+      "tag": "Best",
+      "phase": "middlegame",
+      "cpl": 31,
+      "best_san": null,
+      "best_uci": null,
+      "uci": "e3d4",
+      "eval_after_white": -906,
+      "clock": 81.0,
+      "move_accuracy": 93.8,
+      "is_me": true,
+      "wp_before": 3.8,
+      "wp_after": 3.4,
+      "gap_to_second_best": 21
+    },
+    {
+      "ply": 53,
+      "fullmove": 27,
+      "color": "black",
+      "san": "Rxa4",
+      "tag": "Good",
+      "phase": "middlegame",
+      "cpl": 32,
+      "best_san": "Nxd4",
+      "best_uci": "c6d4",
+      "uci": "a8a4",
+      "eval_after_white": -874,
+      "clock": 193.9,
+      "move_accuracy": 93.6,
+      "is_me": false,
+      "wp_before": 96.6,
+      "wp_after": 96.2,
+      "gap_to_second_best": 26
+    }
+  ],
+  "facts": {
+    "10": {
+      "fen_before": "r1bqk1nr/ppp2ppp/2np4/b3p3/2BPP3/2P2N2/PP3PPP/RNBQK2R w KQkq - 0 6",
+      "material_before": {
+        "white": "P8N2B2R2Q1",
+        "black": "P8N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [
+        "Pc3"
+      ],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [],
+        "checking_captures_if_I_pass": [
+          "Bxc3+"
+        ]
+      },
+      "best_move": {
+        "san": "a4",
+        "line": "a4 a6 dxe5 Bg4 Bg5 Qxg5 Bxf7+ Ke7",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Nge7",
+          "Nh6",
+          "Nf6",
+          "Kf8",
+          "Ke7",
+          "Kd7",
+          "Qe7",
+          "Qd7",
+          "Qf6",
+          "Qg5",
+          "Qh4",
+          "Bd7",
+          "... 35 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Be3",
+      "actual_next": "Nf6 Nbd2 Bg4 O-O",
+      "after_my_move": {
+        "opponent_best_line": "exd4 Nxd4 Bb6 Nd2 Nge7 Qh5 O-O O-O",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [
+          "Bxc3+"
+        ],
+        "my_pinned_pieces": [
+          "Pc3"
+        ],
+        "mate_against_me_in": null
+      }
+    },
+    "12": {
+      "fen_before": "r1bqk2r/ppp2ppp/2np1n2/b3p3/2BPP3/2P1BN2/PP3PPP/RN1QK2R w KQkq - 2 7",
+      "material_before": {
+        "white": "P8N2B2R2Q1",
+        "black": "P8N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [
+        "Pc3"
+      ],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Pe4",
+            "capturable_by": [
+              "Nxe4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": [
+          "Bxc3+"
+        ]
+      },
+      "best_move": {
+        "san": "Qa4",
+        "line": "Qa4 a6 Bd5 Bb6 dxe5 Bxe3 exf6 Bh6",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rg8",
+          "Rf8",
+          "Kf8",
+          "Ke7",
+          "Kd7",
+          "Qe7",
+          "Qd7",
+          "Bd7",
+          "Be6",
+          "Bf5",
+          "Bg4",
+          "Bh3",
+          "... 32 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Nbd2",
+      "actual_next": "Bg4 O-O b5 Bd3",
+      "after_my_move": {
+        "opponent_best_line": "exd4 Nxd4 Nxd4 Bxd4 Bb6 O-O O-O Bd3",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "14": {
+      "fen_before": "r2qk2r/ppp2ppp/2np1n2/b3p3/2BPP1b1/2P1BN2/PP1N1PPP/R2QK2R w KQkq - 4 8",
+      "material_before": {
+        "white": "P8N2B2R2Q1",
+        "black": "P8N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Qb3",
+        "line": "Qb3 O-O dxe5 dxe5 Bc5 Bb6 Bxf8 Qxf8",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rg8",
+          "Rf8",
+          "Kf8",
+          "Ke7",
+          "Kd7",
+          "Qc8",
+          "Qb8",
+          "Qe7",
+          "Qd7",
+          "Rc8",
+          "Rb8",
+          "Ng8",
+          "... 40 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "O-O",
+      "actual_next": "b5 Bd3 Qd7 b4",
+      "after_my_move": {
+        "opponent_best_line": "exd4 cxd4 Bxd2 Bxd2 O-O d5 Ne5 Be2",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "16": {
+      "fen_before": "r2qk2r/p1p2ppp/2np1n2/bp2p3/2BPP1b1/2P1BN2/PP1N1PPP/R2Q1RK1 w kq - 0 9",
+      "material_before": {
+        "white": "P8N2B2R2Q1",
+        "black": "P8N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Bc4",
+            "capturable_by": [
+              "bxc4"
+            ],
+            "legal_recapture_by": [
+              "d2"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Bxb5",
+        "line": "Bxb5 Bd7 Qa4 exd4 Bg5 dxc3 Bxc6 cxb2",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rg8",
+          "Rf8",
+          "Kf8",
+          "Ke7",
+          "Kd7",
+          "Qc8",
+          "Qb8",
+          "Qe7",
+          "Qd7",
+          "Rc8",
+          "Rb8",
+          "Ng8",
+          "... 34 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Bd3",
+      "actual_next": "Qd7 b4 Bb6 d5",
+      "after_my_move": {
+        "opponent_best_line": "a6 h3 Bxf3 Qxf3 O-O d5 Ne7 Bg5",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "18": {
+      "fen_before": "r3k2r/p1pq1ppp/2np1n2/bp2p3/3PP1b1/2PBBN2/PP1N1PPP/R2Q1RK1 w kq - 2 10",
+      "material_before": {
+        "white": "P8N2B2R2Q1",
+        "black": "P8N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Bxb5",
+        "line": "Bxb5 Rb8 Qa4 Rxb5 Qxb5 O-O d5 Nd4",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rg8",
+          "Rf8",
+          "Kf8",
+          "Kd8",
+          "Ke7",
+          "Rd8",
+          "Rc8",
+          "Rb8",
+          "Qd8",
+          "Qc8",
+          "Qe7",
+          "Qe6",
+          "... 39 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "b4",
+      "actual_next": "Bb6 d5 Ne7 Qe2",
+      "after_my_move": {
+        "opponent_best_line": "exd4 Bxb5 dxe3 Qa4 O-O Bxc6 Qc8 e5",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "20": {
+      "fen_before": "r3k2r/p1pq1ppp/1bnp1n2/1p2p3/1P1PP1b1/2PBBN2/P2N1PPP/R2Q1RK1 w kq - 1 11",
+      "material_before": {
+        "white": "P8N2B2R2Q1",
+        "black": "P8N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Bxb5",
+        "line": "Bxb5 Bxf3 Nxf3 Nxe4 Rc1 O-O d5 Qg4",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rg8",
+          "Rf8",
+          "Kf8",
+          "Kd8",
+          "Ke7",
+          "Rd8",
+          "Rc8",
+          "Rb8",
+          "Qd8",
+          "Qc8",
+          "Qe7",
+          "Qe6",
+          "... 41 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "d5",
+      "actual_next": "Ne7 Qe2 O-O-O Bxb5",
+      "after_my_move": {
+        "opponent_best_line": "Ne7 Bxb6 axb6 Qe2 O-O Bxb5 Qc8 h3",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "24": {
+      "fen_before": "2kr3r/p1pqnppp/1b1p1n2/1p1Pp3/1P2P1b1/2PBBN2/P2NQPPP/R4RK1 w - - 3 13",
+      "material_before": {
+        "white": "P8N2B2R2Q1",
+        "black": "P8N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "a4",
+        "line": "a4 Bxf3 Nxf3 Kb8 axb5 Ng4 Bxb6 cxb6",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rdg8",
+          "Rdf8",
+          "Rde8",
+          "Kb8",
+          "Kb7",
+          "Neg8",
+          "Ng6",
+          "Nc6",
+          "Nf5",
+          "... 40 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Bxb5",
+      "actual_next": "c6 dxc6 Nxc6 a4",
+      "after_my_move": {
+        "opponent_best_line": "c6 Bxb6 axb6 dxc6 Nxc6 a4 d5 h3",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "28": {
+      "fen_before": "2kr3r/p2q1ppp/1bnp1n2/1B2p3/1P2P1b1/2P1BN2/P2NQPPP/R4RK1 w - - 0 15",
+      "material_before": {
+        "white": "P7N2B2R2Q1",
+        "black": "P6N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Bxb6",
+        "line": "Bxb6 axb6 a4 d5 a5 dxe4 Nxe4 Qd5",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rdg8",
+          "Rdf8",
+          "Rde8",
+          "Kb8",
+          "Kb7",
+          "Qe8",
+          "Qe7",
+          "Qc7",
+          "Qb7",
+          "... 37 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "a4",
+      "actual_next": "a5 bxa5 Bxa5 Ba6+",
+      "after_my_move": {
+        "opponent_best_line": "Bxe3 Qxe3 Qb7 h3 Bxf3 Qxf3 Kd7 Nc4",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "30": {
+      "fen_before": "2kr3r/3q1ppp/1bnp1n2/pB2p3/PP2P1b1/2P1BN2/3NQPPP/R4RK1 w - - 0 16",
+      "material_before": {
+        "white": "P7N2B2R2Q1",
+        "black": "P6N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Bxb6",
+        "line": "Bxb6 Nh5 bxa5 Nf4 Ba6+ Kb8 Qe3 Ka8",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rdg8",
+          "Rdf8",
+          "Rde8",
+          "Kb8",
+          "Kb7",
+          "Qe8",
+          "Qe7",
+          "Qc7",
+          "Qb7",
+          "... 36 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "bxa5",
+      "actual_next": "Bxa5 Ba6+ Kc7 Nc4",
+      "after_my_move": {
+        "opponent_best_line": "Bxe3 Rfb1 Bxd2 Ba6+ Kc7 Rb7+ Kc8 Rxd7+",
+        "my_loose_pieces": [
+          {
+            "piece": "Pa5",
+            "capturable_by": [
+              "Bxa5",
+              "Nxa5"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "32": {
+      "fen_before": "2kr3r/3q1ppp/2np1n2/bB2p3/P3P1b1/2P1BN2/3NQPPP/R4RK1 w - - 0 17",
+      "material_before": {
+        "white": "P6N2B2R2Q1",
+        "black": "P5N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Pc3",
+            "capturable_by": [
+              "Bxc3"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Nb3",
+        "line": "Nb3 Bxf3 gxf3 Qh3 Bxc6 Kc7 Nxa5 Rb8",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rdg8",
+          "Rdf8",
+          "Rde8",
+          "Kb8",
+          "Kc7",
+          "Kb7",
+          "Qe8",
+          "Qe7",
+          "Qc7",
+          "... 40 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Ba6+",
+      "actual_next": "Kc7 Nc4 Bxc3 Ra3",
+      "after_my_move": {
+        "opponent_best_line": "Kc7 h3 Bxf3 Qxf3 d5 Bb5 Qe6 Rfc1",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "34": {
+      "fen_before": "3r3r/2kq1ppp/B1np1n2/b3p3/P3P1b1/2P1BN2/3NQPPP/R4RK1 w - - 2 18",
+      "material_before": {
+        "white": "P6N2B2R2Q1",
+        "black": "P5N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Pc3",
+            "capturable_by": [
+              "Bxc3"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Rfb1",
+        "line": "Rfb1 Rb8 Rb5 Kd8 Nc4 Ke7 Nxa5 Nxa5",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rdg8",
+          "Rdf8",
+          "Rde8",
+          "Rc8",
+          "Rb8",
+          "Ra8",
+          "Qe8",
+          "Qc8",
+          "Qe7",
+          "... 37 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Nc4",
+      "actual_next": "Bxc3 Ra3 Bd4 Rb3",
+      "after_my_move": {
+        "opponent_best_line": "Nxe4 Bb6+ Bxb6 Nxb6 Kxb6 Rfb1+ Ka7 Rb7+",
+        "my_loose_pieces": [
+          {
+            "piece": "Pe4",
+            "capturable_by": [
+              "Nxe4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Pc3",
+            "capturable_by": [
+              "Bxc3"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "36": {
+      "fen_before": "3r3r/2kq1ppp/B1np1n2/4p3/P1N1P1b1/2b1BN2/4QPPP/R4RK1 w - - 0 19",
+      "material_before": {
+        "white": "P5N2B2R2Q1",
+        "black": "P5N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Pe4",
+            "capturable_by": [
+              "Nxe4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Ra1",
+            "capturable_by": [
+              "Bxa1"
+            ],
+            "legal_recapture_by": [
+              "f1"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Bb6+",
+        "line": "Bb6+ Kb8 Rab1 Ka8 Bxd8 Nd4 Qd3 Qxd8",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Kb8"
+        ],
+        "reply_forced": true
+      },
+      "played_move": "Ra3",
+      "actual_next": "Bd4 Rb3 Ra8 Bb5",
+      "after_my_move": {
+        "opponent_best_line": "Bd4 Bxd4 exd4 Rc1 Bxf3 gxf3 Qh3 Na5",
+        "my_loose_pieces": [
+          {
+            "piece": "Pe4",
+            "capturable_by": [
+              "Nxe4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "38": {
+      "fen_before": "3r3r/2kq1ppp/B1np1n2/4p3/P1NbP1b1/R3BN2/4QPPP/5RK1 w - - 2 20",
+      "material_before": {
+        "white": "P5N2B2R2Q1",
+        "black": "P5N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Pe4",
+            "capturable_by": [
+              "Nxe4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Bxd4",
+        "line": "Bxd4 exd4 Rc1 Rb8 Na5 Kd8 Bb5 Nxa5",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rdg8",
+          "Rdf8",
+          "Rde8",
+          "Rc8",
+          "Rb8",
+          "Ra8",
+          "Qe8",
+          "Qc8",
+          "Qe7",
+          "... 37 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Rb3",
+      "actual_next": "Ra8 Bb5 Nxe4 Qd3",
+      "after_my_move": {
+        "opponent_best_line": "Rb8 Bb5 Rhc8 Na5 Rxb5 Rxb5 Nxa5 Bxd4",
+        "my_loose_pieces": [
+          {
+            "piece": "Pe4",
+            "capturable_by": [
+              "Nxe4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "40": {
+      "fen_before": "r6r/2kq1ppp/B1np1n2/4p3/P1NbP1b1/1R2BN2/4QPPP/5RK1 w - - 4 21",
+      "material_before": {
+        "white": "P5N2B2R2Q1",
+        "black": "P5N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Ba6",
+            "capturable_by": [
+              "Rxa6"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Pe4",
+            "capturable_by": [
+              "Nxe4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Rb7+",
+        "line": "Rb7+ Kd8 Rxd7+ Kxd7 Bb5 Rhc8 Bxd4 exd4",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Kd8",
+          "Kc8"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Bb5",
+      "actual_next": "Nxe4 Qd3 Nc5 Nb6",
+      "after_my_move": {
+        "opponent_best_line": "Kd8 Rc1 Rc8 Qd1 d5 Nb6 Bxb6 Bxb6+",
+        "my_loose_pieces": [
+          {
+            "piece": "Pe4",
+            "capturable_by": [
+              "Nxe4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "42": {
+      "fen_before": "r6r/2kq1ppp/2np4/1B2p3/P1Nbn1b1/1R2BN2/4QPPP/5RK1 w - - 0 22",
+      "material_before": {
+        "white": "P4N2B2R2Q1",
+        "black": "P5N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Nb6",
+        "line": "Nb6 Qe6 Nxa8+ Rxa8 Bxc6 Qxb3 Bxa8 Nc3",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rhd8",
+          "Rhc8",
+          "Rhb8",
+          "Rag8",
+          "Raf8",
+          "Rae8",
+          "Rad8",
+          "Rac8",
+          "Rab8",
+          "... 57 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Qd3",
+      "actual_next": "Nc5 Nb6 Kxb6 Bc4+",
+      "after_my_move": {
+        "opponent_best_line": "Bxf3 gxf3 Nc5 Qd1 Rhb8 Rb1 Qf5 Rc1",
+        "my_loose_pieces": [],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "44": {
+      "fen_before": "r6r/2kq1ppp/2np4/1Bn1p3/P1Nb2b1/1R1QBN2/5PPP/5RK1 w - - 2 23",
+      "material_before": {
+        "white": "P4N2B2R2Q1",
+        "black": "P5N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Qd3",
+            "capturable_by": [
+              "Nxd3"
+            ],
+            "legal_recapture_by": [
+              "b3"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Rb3",
+            "capturable_by": [
+              "Nxb3"
+            ],
+            "legal_recapture_by": [
+              "d3"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Qb1",
+        "line": "Qb1 Nxb3 Qxb3 Bxf3 gxf3 Rhb8 Rc1 Kd8",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rhd8",
+          "Rhc8",
+          "Rhb8",
+          "Rag8",
+          "Raf8",
+          "Rae8",
+          "Rad8",
+          "Rac8",
+          "Rab8",
+          "... 56 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Nb6",
+      "actual_next": "Kxb6 Bc4+ Kc7 Nxd4",
+      "after_my_move": {
+        "opponent_best_line": "Qe6 Bxc6 Nxd3 Bd5 Qg6 Nxa8+ Rxa8 Bxa8",
+        "my_loose_pieces": [
+          {
+            "piece": "Nb6",
+            "capturable_by": [
+              "Kxb6"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Qd3",
+            "capturable_by": [
+              "Nxd3"
+            ],
+            "legal_recapture_by": [
+              "b3",
+              "b5"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Rb3",
+            "capturable_by": [
+              "Nxb3"
+            ],
+            "legal_recapture_by": [
+              "d3"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "46": {
+      "fen_before": "r6r/3q1ppp/1knp4/1Bn1p3/P2b2b1/1R1QBN2/5PPP/5RK1 w - - 0 24",
+      "material_before": {
+        "white": "P4N1B2R2Q1",
+        "black": "P5N2B2R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Qd3",
+            "capturable_by": [
+              "Nxd3"
+            ],
+            "legal_recapture_by": [
+              "b3",
+              "b5"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Rb3",
+            "capturable_by": [
+              "Nxb3"
+            ],
+            "legal_recapture_by": [
+              "d3"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Nxd4",
+        "line": "Nxd4 Nxd3 Bxc6+ Kc7 Rb7+ Kd8 Rxd7+ Bxd7",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Rhg8",
+          "Rhf8",
+          "Rhe8",
+          "Rhd8",
+          "Rhc8",
+          "Rhb8",
+          "Rag8",
+          "Raf8",
+          "Rae8",
+          "Rad8",
+          "Rac8",
+          "Rab8",
+          "... 59 total"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Bc4+",
+      "actual_next": "Kc7 Nxd4 Nxd3 Rxd3",
+      "after_my_move": {
+        "opponent_best_line": "Kc7 Nxd4 exd4 Bxd4 Nxd3 Bb6+ Kb7 Bxd3",
+        "my_loose_pieces": [
+          {
+            "piece": "Rb3",
+            "capturable_by": [
+              "Nxb3"
+            ],
+            "legal_recapture_by": [
+              "c4",
+              "d3"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    },
+    "50": {
+      "fen_before": "r6r/2kq1ppp/2np4/4p3/P1BN2b1/1R1nB3/5PPP/5RK1 w - - 0 26",
+      "material_before": {
+        "white": "P4N1B2R2Q0",
+        "black": "P5N2B1R2Q1"
+      },
+      "my_pinned_pieces_before": [],
+      "opponent_could_have_played_before_my_move": {
+        "my_loose_pieces_if_I_pass": [
+          {
+            "piece": "Nd4",
+            "capturable_by": [
+              "Nxd4",
+              "exd4"
+            ],
+            "legal_recapture_by": [
+              "e3"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Pa4",
+            "capturable_by": [
+              "Rxa4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "checking_captures_if_I_pass": []
+      },
+      "best_move": {
+        "san": "Nb5+",
+        "line": "Nb5+ Kd8 Rxd3 Ke7 f4 Rxa4 Bxf7 Nb4",
+        "mate_in": null,
+        "opponent_legal_replies": [
+          "Kd8",
+          "Kc8",
+          "Kb8",
+          "Kb7"
+        ],
+        "reply_forced": false
+      },
+      "played_move": "Rxd3",
+      "actual_next": "exd4 Bxd4 Rxa4",
+      "after_my_move": {
+        "opponent_best_line": "exd4 Bd2 Be2 Rc1 Bxd3 Bxd3 Kd8 g3",
+        "my_loose_pieces": [
+          {
+            "piece": "Nd4",
+            "capturable_by": [
+              "Nxd4",
+              "exd4"
+            ],
+            "legal_recapture_by": [
+              "d3",
+              "e3"
+            ],
+            "static_defenders_that_cannot_recapture": []
+          },
+          {
+            "piece": "Pa4",
+            "capturable_by": [
+              "Rxa4"
+            ],
+            "legal_recapture_by": [],
+            "static_defenders_that_cannot_recapture": []
+          }
+        ],
+        "opponent_checking_captures": [],
+        "my_pinned_pieces": [],
+        "mate_against_me_in": null
+      }
+    }
+  },
+  "motifs": {
+    "missed": [
+      {
+        "ply": 12,
+        "motifs": [
+          "pin",
+          "fork"
+        ],
+        "san": "Qa4"
+      },
+      {
+        "ply": 16,
+        "motifs": [
+          "pin"
+        ],
+        "san": "Bxb5"
+      },
+      {
+        "ply": 42,
+        "motifs": [
+          "fork"
+        ],
+        "san": "Nb6"
+      }
+    ],
+    "opponent": []
+  },
+  "engine": {
+    "depth": 16,
+    "multipv": 2
+  }
+}
