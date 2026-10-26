@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Blunder Bait practice page: a playable board whose bot strength
+"""Build the Practice Bot page: a playable board whose bot strength
 and baited patterns are calibrated from your own bulk_review.py batch data.
 Prints the computed Elo band and weakness check as JSON.
 

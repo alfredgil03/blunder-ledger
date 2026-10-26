@@ -4,7 +4,7 @@ This is how every number on the three pages gets made, so you can check it (or a
 
 ## How it's put together
 
-There are three main scripts. `review.py` looks at one game, `bulk_review.py` looks at a batch of games and builds the Blunder Ledger, and `practice.py` builds the practice page from batches that were already saved, so it never runs the engine itself. `blunder.py` just runs them in order.
+There are three main scripts. `review.py` looks at one game, `bulk_review.py` looks at a batch of games and builds the Progress Dashboard, and `practice.py` builds the practice page from batches that were already saved, so it never runs the engine itself. `blunder.py` just runs them in order.
 
 The tactic detector is in `motifs.py` and all three use it. The scoring formulas are copied into both `review.py` and `bulk_review.py` so each one reads on its own, and there's a test that makes sure the two copies still agree.
 
@@ -92,13 +92,13 @@ Pins and discovered checks are exact. Discovered attacks and forks are approxima
 
 ## Error bars
 
-The rates on the ledger (blunder rate and the tactic shares) have a 95% range, and I count it by game instead of by move. The reason is that one bad game usually has a bunch of blunders that aren't independent of each other, so if every move counted separately the ranges would look tighter than they really are. The "Is the change real?" note uses these ranges to compare the last 50 games to the 50 before.
+The rates on the dashboard (blunder rate and the tactic shares) have a 95% range, and I count it by game instead of by move. The reason is that one bad game usually has a bunch of blunders that aren't independent of each other, so if every move counted separately the ranges would look tighter than they really are. The "Is the change real?" note uses these ranges to compare the last 50 games to the 50 before.
 
 ## The pages
 
-The review and ledger pages have the raw analysis built into them and calculate every number in the browser, so nothing is typed in by hand. When there are two batches, the Last 50 / Previous 50 / Both switch recalculates everything. The only written content is optional notes passed in with `--notes`.
+The review and dashboard pages have the raw analysis built into them and calculate every number in the browser, so nothing is typed in by hand. When there are two batches, the Last 50 / Previous 50 / Both switch recalculates everything. The only written content is optional notes passed in with `--notes`.
 
-## Practice bot (Blunder Bait)
+## Practice Bot
 
 The bot is a small engine written in JavaScript on top of chess.js instead of Stockfish. That's on purpose: its whole job is to sometimes pick a slightly worse move so it can set a trap, and I needed control over the search to do that.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The Blunder Ledger: engine review across a batch of chess.com games (50 at a
+The Progress Dashboard: engine review across a batch of chess.com games (50 at a
 time by default), rendered as an interactive dashboard. Where review.py does
 one game in full per-move detail, this trades per-move granularity (single
 PV, lower depth) for speed across a batch. What matters here is the aggregate
@@ -18,7 +18,7 @@ Usage:
 
 notes.json (optional, --notes) holds the hand-written parts of a report:
   {
-    "title": "Blunder Ledger",
+    "title": "Progress Dashboard",
     "subtitle": "last 100 rapid games, Aug 16 to Sep 15, 2026",
     "practice_intro": "...",
     "practice": [{"title": "...", "why": "..."}]
@@ -542,7 +542,7 @@ def render(newest, previous, batch_no, notes, title, subtitle, tz, template_path
 
     username = newest.get("username") or "player"
     time_class = newest.get("time_class")
-    title = title or notes.get("title") or "Blunder Ledger"
+    title = title or notes.get("title") or "Progress Dashboard"
     subtitle = subtitle or notes.get("subtitle") or (
         f"{len(newest['games'])} games, batch {batch_no}" + (f", {time_class} only" if time_class else ""))
     source = "source: chess.com public game archive" + (f", {time_class} games only" if time_class else "")

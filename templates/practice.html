@@ -1,4 +1,4 @@
-<title>Blunder Bait</title>
+<title>Practice Bot</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@500;600;700&family=Inconsolata:wght@400;500;700&display=swap">
 <style>
@@ -139,7 +139,7 @@
     <div>
       <p class="eyebrow">practice session</p>
       <div class="title-row">
-        <h1>Blunder Bait</h1>
+        <h1>Practice Bot</h1>
         <button class="btn ghost" id="btnReview">Review ↗</button>
       </div>
       <p class="sub">A sparring partner that leans into the tactical pattern you actually miss most — bot level and target recalculated from your latest bulk_review.py data each time you start a session.</p>
@@ -1596,7 +1596,7 @@
     document.getElementById("statTaken").textContent = state.baitTaken;
     document.getElementById("statPunished").textContent = Object.keys(state.punish).reduce(function (n, k) { return n + state.punish[k]; }, 0);
     document.getElementById("overBanner").innerHTML = state.over ? '<div class="over-banner">' + state.overText + "</div>" : "";
-    document.getElementById("footerNote").textContent = "The game in progress lives in this browser tab. Finished games and review runs are saved to this browser's own history (see History), kept separate from your real games and the ledger data. Run practice.py again to recheck your rating and blunder mix and rebuild this page.";
+    document.getElementById("footerNote").textContent = "The game in progress lives in this browser tab. Finished games and review runs are saved to this browser's own history (see History), kept separate from your real games and the dashboard data. Run practice.py again to recheck your rating and blunder mix and rebuild this page.";
   }
 
   // ---- events ----

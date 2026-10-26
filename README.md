@@ -4,21 +4,21 @@ A set of tools linked to chess.com for a review of any single game, a progress r
 
 I built this so I could study my own games without paying for chess.com's premium analysis. Everything runs on Stockfish installed on your own computer plus the chess.com public API, so there's no daily limit and nothing to pay for.
 
-You can try it without installing anything. The [demo ledger](https://alfredgil03.github.io/blunder-ledger/demo/ledger.html) runs on my own games, the [practice bot](https://alfredgil03.github.io/blunder-ledger/demo/practice.html) is playable right in the browser, and there's a [game review](https://alfredgil03.github.io/blunder-ledger/demo/review.html) of one full game.
+You can try it without installing anything. The [demo dashboard](https://alfredgil03.github.io/blunder-ledger/demo/ledger.html) runs on my own games, the [practice bot](https://alfredgil03.github.io/blunder-ledger/demo/practice.html) is playable right in the browser, and there's a [game review](https://alfredgil03.github.io/blunder-ledger/demo/review.html) of one full game.
 
 ## The three tools
 
 The idea is to use them together. Review a game, look at the patterns across a lot of games, then practice against the exact patterns you keep falling for. Each practice puzzle links back to the real game it came from.
 
-### 1. Game review (`scripts/review.py`)
+### 1. Game Review (`scripts/review.py`)
 
 Every move gets tagged (Brilliant, Great Find, Best, Excellent, Good, Inaccuracy, Mistake, Miss, or Blunder) and each side gets an accuracy score. There's also a win-probability line, a board you can step through move by move, the worst and best moves of the game, the tactics you missed, and your record against that opponent.
 
 ![Single-game review](docs/screenshots/review.png)
 
-### 2. The Blunder Ledger (`scripts/bulk_review.py`)
+### 2. Progress Dashboard (`scripts/bulk_review.py`)
 
-This is the progress report. It looks at 50 games at a time and shows:
+It looks at 50 games at a time and shows:
 - blunder rate, how many blunders just hung a piece, how many losses were checkmate vs resignation, and average accuracy, each with a 95% range so a small change doesn't get mistaken for a trend
 - move quality in the opening, middlegame, and endgame
 - what kind of tactic you missed (hung material, missed mate, discovered attack, fork, pin) and what each blunder let your opponent do
@@ -28,15 +28,15 @@ This is the progress report. It looks at 50 games at a time and shows:
 
 With two batches saved you can switch between Last 50, Previous 50, and Both, and everything recalculates.
 
-![Blunder Ledger dashboard](docs/screenshots/ledger.png)
+![Progress Dashboard](docs/screenshots/ledger.png)
 
-### 3. Blunder Bait (`scripts/practice.py`)
+### 3. Practice Bot (`scripts/practice.py`)
 
 A practice bot that runs entirely in the browser. Its strength is set from your recent rating (you can change it with a dropdown), and out of its good moves it likes to pick ones that leave a trap you tend to fall for: a hanging piece, a discovered attack, a fork, or a pin. How often it tries each one depends on how often that one actually costs you. It'll also punish you when you leave one of those open.
 
 Review mode turns the most costly moments from your games that week into puzzles. You can retry them, see why the engine's move works, and jump to the full review of that game. Your practice history stays in the browser.
 
-![Blunder Bait practice bot](docs/screenshots/practice.png)
+![Practice Bot](docs/screenshots/practice.png)
 
 ## Getting started
 
@@ -57,7 +57,7 @@ The pages end up in `out/` (`ledger.html`, `practice.html`, `review.html`). The 
 
 ```bash
 python scripts/blunder.py analyze  --username <you>                  # engine pass: last 50 games plus the 50 before (about 2-3 s a game)
-python scripts/blunder.py report                                     # ledger from the two newest batches
+python scripts/blunder.py report                                     # dashboard from the two newest batches
 python scripts/blunder.py practice [--with-reviews --username <you>] # bot; optionally a review page for every puzzle's game
 python scripts/blunder.py review   --username <you> [--url <game>]   # one game (default: your most recent)
 ```
@@ -70,7 +70,7 @@ Games come from the chess.com public API, so there's no login or scraping. Every
 
 The practice bot isn't Stockfish. It's a small search I wrote in JavaScript, because the whole point of the bot is to sometimes play a slightly worse move on purpose to set a trap, and I needed control over the search for that. It doesn't need a server, which is why it works as a static page.
 
-The tactic detector is in one shared file (`scripts/motifs.py`) that everything uses, so the review, the ledger, and the bot never disagree about what counts as a fork or a pin.
+The tactic detector is in one shared file (`scripts/motifs.py`) that everything uses, so the review, the dashboard, and the bot never disagree about what counts as a fork or a pin.
 
 All the rules and formulas are in [docs/methodology.md](docs/methodology.md).
 
